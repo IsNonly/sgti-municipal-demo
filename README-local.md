@@ -54,20 +54,27 @@ npm run dev
 ```
 
 **7. Abrir en el navegador**
+
+Para admin, gerente y operador:
 ```
 http://localhost:3001?tenant=demo
+```
+
+Para superadmin (sin el parametro tenant):
+```
+http://localhost:3001
 ```
 
 ---
 
 ## Cuentas de prueba
 
-| Rol        | Usuario    | Password         |
-|------------|------------|------------------|
-| SuperAdmin | superadmin | superadmin_demo  |
-| Admin      | admin      | admin_demo       |
-| Gerente    | gerente1   | gerente_demo     |
-| Operador   | operador1  | operador_demo    |
+| Rol        | Usuario    | Password         | URL de acceso                        |
+|------------|------------|------------------|--------------------------------------|
+| SuperAdmin | superadmin | superadmin_demo  | http://localhost:3001                |
+| Admin      | admin      | admin_demo       | http://localhost:3001?tenant=demo    |
+| Gerente    | gerente1   | gerente_demo     | http://localhost:3001?tenant=demo    |
+| Operador   | operador1  | operador_demo    | http://localhost:3001?tenant=demo    |
 
 ---
 
