@@ -1,22 +1,26 @@
 /**
  * migrate-local.js
- * Crea todas las tablas en la base de datos local (MySQL).
+ * Crea todas las tablas en la base de datos demo (Supabase/PostgreSQL o MySQL local).
  * Uso: node scripts/migrate-local.js
  *
- * Requiere .env configurado con DB_UNIFIED_* apuntando a tu MySQL local.
+ * Requiere .env configurado con DB_UNIFIED_* — por defecto apunta a Supabase.
  */
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
 const { Sequelize, DataTypes } = require('sequelize');
 
+const dialect = process.env.DB_DIALECT || 'mysql';
 const sequelize = new Sequelize(
   process.env.DB_UNIFIED_NAME,
   process.env.DB_UNIFIED_USER,
   process.env.DB_UNIFIED_PASS,
   {
     host: process.env.DB_UNIFIED_HOST || '127.0.0.1',
-    port: process.env.DB_UNIFIED_PORT || 3306,
-    dialect: 'mysql',
+    port: process.env.DB_UNIFIED_PORT || (dialect === 'postgres' ? 5432 : 3306),
+    dialect,
+    dialectOptions: process.env.DB_SSL === 'true'
+      ? { ssl: { require: true, rejectUnauthorized: false } }
+      : {},
     logging: (msg) => console.log('  SQL:', msg.substring(0, 120)),
   }
 );
