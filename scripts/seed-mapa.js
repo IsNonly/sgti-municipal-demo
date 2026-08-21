@@ -79,7 +79,7 @@ const CATS = {
   limpieza:      ['basura_acumulada', 'desmonte', 'punto_critico_residuos', 'animales_en_via'],
   transito:      ['accidente_vehicular', 'vehiculo_mal_estacionado', 'semaforo_averiado', 'via_bloqueada'],
 };
-const ESTADOS  = ['nuevo', 'nuevo', 'nuevo', 'en_proceso', 'en_proceso', 'atendida'];
+const ESTADOS  = ['nuevo', 'nuevo', 'nuevo', 'en_proceso', 'en_proceso', 'atendido'];
 const PRIORIDADES = ['Alta', 'Alta', 'Media', 'Media', 'Media', 'Baja'];
 const OPERADORES = ['Carlos Mendoza', 'Sofia Quispe', 'Luis Torres', 'Ana Flores', 'Jorge Ramirez'];
 const TELEFONOS  = ['999111001', '999111002', '999111003', '999111004', '999111005'];

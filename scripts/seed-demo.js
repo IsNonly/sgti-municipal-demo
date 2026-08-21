@@ -116,12 +116,12 @@ async function run() {
   const reportes = [
     { id: 'DEMO-001', grupo: 'seguridad',     cat: 'robo',          prio: 'alta',  sector: 'S1', dir: 'Av. Principal 100',  lat: -12.046, lng: -77.042, estado: 'nuevo',      dias: 0 },
     { id: 'DEMO-002', grupo: 'seguridad',     cat: 'disturbio',     prio: 'media', sector: 'S2', dir: 'Jr. Las Flores 200', lat: -12.047, lng: -77.043, estado: 'en_proceso', dias: 1 },
-    { id: 'DEMO-003', grupo: 'limpieza',      cat: 'basura',        prio: 'baja',  sector: 'S1', dir: 'Calle Los Pinos 50', lat: -12.048, lng: -77.044, estado: 'atendida',   dias: 2 },
+    { id: 'DEMO-003', grupo: 'limpieza',      cat: 'basura',        prio: 'baja',  sector: 'S1', dir: 'Calle Los Pinos 50', lat: -12.048, lng: -77.044, estado: 'atendido',   dias: 2 },
     { id: 'DEMO-004', grupo: 'transito',      cat: 'accidente',     prio: 'alta',  sector: 'S3', dir: 'Av. Republica 300', lat: -12.049, lng: -77.045, estado: 'nuevo',      dias: 0 },
     { id: 'DEMO-005', grupo: 'fiscalizacion', cat: 'local_sin_lic', prio: 'media', sector: 'S2', dir: 'Jr. Comercio 450',  lat: -12.050, lng: -77.046, estado: 'pendiente',  dias: 3 },
     { id: 'DEMO-006', grupo: 'seguridad',     cat: 'vandalismo',    prio: 'media', sector: 'S4', dir: 'Av. Los Parques 80',lat: -12.051, lng: -77.047, estado: 'nuevo',      dias: 1 },
     { id: 'DEMO-007', grupo: 'limpieza',      cat: 'desmonte',      prio: 'baja',  sector: 'S1', dir: 'Calle Union 25',    lat: -12.052, lng: -77.048, estado: 'en_proceso', dias: 4 },
-    { id: 'DEMO-008', grupo: 'transito',      cat: 'semaforo',      prio: 'alta',  sector: 'S3', dir: 'Interseccion Lima', lat: -12.053, lng: -77.049, estado: 'atendida',   dias: 5 },
+    { id: 'DEMO-008', grupo: 'transito',      cat: 'semaforo',      prio: 'alta',  sector: 'S3', dir: 'Interseccion Lima', lat: -12.053, lng: -77.049, estado: 'atendido',   dias: 5 },
     { id: 'DEMO-009', grupo: 'seguridad',     cat: 'ruido',         prio: 'baja',  sector: 'S2', dir: 'Jr. Bello 120',    lat: -12.054, lng: -77.050, estado: 'nuevo',      dias: 0 },
     { id: 'DEMO-010', grupo: 'fiscalizacion', cat: 'publicidad',    prio: 'baja',  sector: 'S4', dir: 'Av. Central 600',  lat: -12.055, lng: -77.051, estado: 'pendiente',  dias: 2 },
   ];
