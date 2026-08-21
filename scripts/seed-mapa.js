@@ -99,7 +99,7 @@ async function run() {
   await sequelize.query(`DELETE FROM "MensajeWhatsapps" WHERE "organizationId" = '${ORG}' AND "idString" LIKE 'DEMO-%'`).catch(()=>{});
 
   const registros = [];
-  for (let i = 1; i <= 200; i++) {
+  for (let i = 1; i <= 400; i++) {
     const punto    = PUNTOS[i % PUNTOS.length];
     const grupo    = pick(GRUPOS);
     const cats     = CATS[grupo];
@@ -108,7 +108,7 @@ async function run() {
     const prio     = pick(PRIORIDADES);
     const operador = pick(OPERADORES);
     const telef    = pick(TELEFONOS);
-    const horasAtras = Math.floor(Math.random() * 168); // hasta 7 dias atras
+    const horasAtras = Math.floor(Math.random() * 504); // hasta 21 dias atras (todo agosto)
     const fecha    = hace(horasAtras);
     const id       = `MOB-${String(Date.now() + i).slice(-6)}`;
     const areas    = grupo === 'fiscalizacion'
@@ -137,11 +137,11 @@ async function run() {
   for (let i = 0; i < registros.length; i += 10) {
     const lote = registros.slice(i, i + 10);
     await sequelize.query(`INSERT INTO "MensajeWhatsapps" (${cols}) VALUES ${lote.join(',')}`);
-    process.stdout.write(`  ${i + lote.length}/200\r`);
+    process.stdout.write(`  ${i + lote.length}/400\r`);
   }
 
-  console.log('\n200 reportes del mapa cargados correctamente.');
-  console.log('Distribuidos en los ultimos 7 dias, con coordenadas reales en Lima y Callao.');
+  console.log('\n400 reportes del mapa cargados correctamente.');
+  console.log('Distribuidos durante todo agosto, con coordenadas en Carmen de la Legua.');
 
   // Resumen por grupo
   const [stats] = await sequelize.query(
