@@ -90,6 +90,10 @@ async function run() {
   await sequelize.authenticate();
   console.log('Conectado. Generando reportes del mapa...');
 
+  // Actualizar centro del mapa a Carmen de la Legua
+  await sequelize.query(`UPDATE "Configuraciones" SET "valor"='-12.0457' WHERE "organizationId"='${ORG}' AND "clave"='lat_centro'`).catch(()=>{});
+  await sequelize.query(`UPDATE "Configuraciones" SET "valor"='-77.0935' WHERE "organizationId"='${ORG}' AND "clave"='lng_centro'`).catch(()=>{});
+
   // Eliminar los MOB- anteriores del demo para empezar limpio
   await sequelize.query(`DELETE FROM "MensajeWhatsapps" WHERE "organizationId" = '${ORG}' AND "idString" LIKE 'MOB-%'`).catch(()=>{});
   await sequelize.query(`DELETE FROM "MensajeWhatsapps" WHERE "organizationId" = '${ORG}' AND "idString" LIKE 'DEMO-%'`).catch(()=>{});
