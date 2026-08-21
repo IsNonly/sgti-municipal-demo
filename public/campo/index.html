@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SGTI | Sistema de Gestión Territorial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app-container" class="app-container">
+        
+        <header id="main-content" class="hidden">
+            <div class="status-bar">
+                <div class="status-left"><span class="status-dot"></span> <span id="logged-user-status">EN L&Iacute;NEA</span></div>
+                <button onclick="logoutMobile()" style="background:none; border:none; color:white; font-size:0.7rem; opacity:0.6;">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Login con Marca de Agua Profesional -->
+        <div id="section-login" class="form-section login-viewport">
+            <div class="login-card">
+                <div class="login-logo"><img src="logo.png"></div>
+                <div class="login-header"><h2>Acceso Personal</h2><p>Ingresa tus credenciales de operador</p></div>
+                <form onsubmit="ejecutarLogin(event)">
+                    <div class="form-group" style="text-align:center;"><label style="text-align:center; color:var(--accent); font-weight:700;">Usuario</label><input type="text" id="login-user" placeholder="Tu usuario" required style="text-align:center;"></div>
+                    <div class="form-group" style="text-align:center;"><label style="text-align:center; color:var(--accent); font-weight:700;">Contrase&ntilde;a</label><input type="password" id="login-pass" placeholder="Tu contrase&ntilde;a" required style="text-align:center;"></div>
+                    <div id="login-error" class="error-msg"></div>
+                    <button type="submit" class="btn-primary">Ingresar <i class="fas fa-sign-in-alt"></i></button>
+                </form>
+            </div>
+            
+            <!-- Marca de Agua (Copyright) -->
+            <div class="login-footer">
+                <p>© 2026 Municipalidad de Carmen de la Legua Reynoso</p>
+                <p>SGTI | Sistema de Gestión Territorial Inteligente</p>
+            </div>
+        </div>
+
+        <!-- Dashboard Gerente -->
+        <div id="section-manager" class="form-section hidden">
+            <div class="glass-card">
+                <div class="dash-container"><div class="dash active"></div></div>
+                <div class="manager-tabs">
+                    <button class="tab-btn active" data-tab="tab-equipo"><i class="fas fa-user-plus"></i> Registro</button>
+                    <button class="tab-btn" data-tab="tab-lista"><i class="fas fa-list-ul"></i> Mi Personal</button>
+                    <button class="tab-btn" data-tab="tab-novedades" style="position:relative;"><i class="fas fa-bell"></i> Novedades<span id="novedades-badge" class="nov-badge hidden">0</span></button>
+                </div>
+                <div id="tab-equipo" class="tab-content">
+                    <div class="operator-header"><h3><i class="fas fa-user-shield" style="color:var(--accent);"></i> Registro</h3><p>Crea nuevos accesos.</p></div>
+                    <div class="form-group"><label>Nombre Completo</label><input type="text" id="m-eq-nombre"></div>
+                    <div class="form-group"><label>Usuario</label><input type="text" id="m-eq-user"></div>
+                    <div class="form-group"><label>Contrase&ntilde;a</label><input type="password" id="m-eq-pass"></div>
+                    <div class="form-group"><label>&Aacute;rea</label><select id="m-eq-area"></select></div>
+                    <button onclick="crearUsuarioMovil()" class="btn-primary">Crear Acceso <i class="fas fa-check"></i></button>
+                </div>
+                <div id="tab-lista" class="tab-content hidden"><div id="m-lista-container"></div></div>
+                <div id="tab-novedades" class="tab-content hidden">
+                    <div class="operator-header"><h3><i class="fas fa-bell" style="color:var(--accent);"></i> Novedades</h3><p>Reportes de tu personal y derivaciones de otras áreas.</p></div>
+                    <div id="m-novedades-container"><p style="text-align:center; color:var(--text-muted); padding:20px;">Cargando novedades...</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ubicacion Operador -->
+        <div id="section-location" class="form-section hidden">
+            <div class="glass-card">
+                <div class="dash-container"><div class="dash active"></div></div>
+                <div class="operator-header">
+                    <h3><i class="fas fa-map-marker-alt" style="color:var(--accent);"></i> Ubicacion</h3>
+                    <p>Detectaremos tu ubicación automáticamente. Si es necesario, ajusta el marcador en el mapa.</p>
+                </div>
+                <div id="map-wrapper"><div id="map" style="height:100%; width:100%;"></div></div>
+                <div class="address-pill"><i id="address-mode-icon" class="fas fa-check-circle" style="color:var(--accent);"></i> <span id="current-address">Localizando...</span></div>
+                <button onclick="recalibrarUbicacion()" class="btn-secondary" style="margin-bottom:12px;"><i class="fas fa-sync-alt"></i> Recalibrar Ubicacion</button>
+                <button onclick="toggleDireccionManual()" id="btn-manual-address" class="btn-secondary" style="margin-bottom:12px;"><i class="fas fa-keyboard"></i> Escribir Direccion Manual</button>
+                <div id="manual-address-box" class="hidden" style="margin-bottom:12px;">
+                    <div class="form-group">
+                        <label style="color:var(--accent);">Direccion de la Incidencia</label>
+                        <input type="text" id="manual-address-input" placeholder="Ej: Av. Principal 350, Mz. B Lt. 5">
+                        <p style="font-size:11px; color:var(--text-dim); margin-top:6px;">Usa esta opción si reportas desde un lugar distinto a donde ocurrió la incidencia.</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="usarDireccionManual()" id="btn-usar-direccion" class="btn-primary" style="flex:1;"><i class="fas fa-check"></i> Usar esta direccion</button>
+                        <button onclick="cancelarDireccionManual()" class="btn-secondary" style="flex:1;"><i class="fas fa-location-crosshairs"></i> Volver a GPS</button>
+                    </div>
+                </div>
+                <div style="display:flex; gap:12px;">
+                    <button onclick="volverSupervisor()" id="btn-volver-supervisor" class="btn-secondary hidden" style="flex:1; margin:0;"><i class="fas fa-arrow-left"></i> Volver</button>
+                    <button onclick="showSection('section-details')" id="btn-siguiente-location" class="btn-primary" style="flex:1; margin:0;">Siguiente <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detalles Operador -->
+        <div id="section-details" class="form-section hidden">
+            <div class="glass-card">
+                <div class="dash-container"><div class="dash active"></div><div class="dash active"></div></div>
+                <div class="operator-header">
+                    <h3><i class="fas fa-edit" style="color:var(--accent);"></i> Detalles</h3>
+                    <p>Cuéntanos qué está sucediendo para intervenir con precisión.</p>
+                </div>
+                <div class="form-group"><label style="color:var(--accent);">Prioridad</label><select id="report-priority"><option value="Baja">Baja</option><option value="Media" selected>Media (Atención normal)</option><option value="Alta">Alta (Urgencia)</option></select></div>
+                <div class="form-group"><label style="color:var(--accent);">Estado del Reporte</label><select id="report-status"><option value="atendido" selected>Atendido / Finalizado</option><option value="nuevo">Pendiente</option></select></div>
+                <div class="form-group"><label style="color:var(--accent);">Tipo de Agente / Desplazamiento</label><select id="report-agent-type"><option value="A pie" selected>A pie</option><option value="Motorizado">Motorizado</option><option value="Scooter">Scooter</option><option value="Ciclista">Ciclista</option><option value="Móvil">Móvil (Patrullero)</option><option value="Supervisor">Supervisor</option><option value="Coordinador">Coordinador</option></select></div>
+                <div class="form-group"><label style="color:var(--accent);">Descripción de la Intervencion</label><textarea id="report-description" style="height:100px;" placeholder="Escribe aquí los detalles del incidente..."></textarea></div>
+                <div class="form-group">
+                    <label style="color:var(--accent);">Evidencia Fotografica (Opcional)</label>
+                    <button onclick="abrirSelectorFoto()" id="btn-photo" class="btn-photo-dotted"><i class="fas fa-camera"></i> Tomar o Seleccionar Foto</button>
+                    <input type="file" id="input-photo-gallery" accept="image/*" style="display:none;" onchange="procesarFotoGaleria(this)">
+                    <div id="photos-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px;"></div>
+                </div>
+                <div class="form-group">
+                    <label style="color:var(--accent);">Evidencia en Video (Opcional)</label>
+                    <button onclick="abrirSelectorVideo()" id="btn-video" class="btn-photo-dotted"><i class="fas fa-video"></i> Grabar o Seleccionar Video</button>
+                    <input type="file" id="input-video-record" accept="video/*" capture="environment" style="display:none;" onchange="procesarVideo(this)">
+                    <input type="file" id="input-video-gallery" accept="video/*" style="display:none;" onchange="procesarVideo(this)">
+                    <div id="videos-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 15px;"></div>
+                </div>
+                <div style="display:flex; gap:12px;">
+                    <button onclick="showSection('section-location')" class="btn-secondary" style="flex:1;"><i class="fas fa-arrow-left"></i> Volver</button>
+                    <button onclick="enviarReporte()" id="btn-enviar" class="btn-primary" style="flex:2;">Enviar Reporte <i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Supervisor de Campo -->
+        <div id="section-supervisor" class="form-section hidden">
+            <div class="glass-card">
+                <div class="operator-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <div style="flex:1; padding-right:10px;">
+                        <h3><i class="fas fa-tasks" style="color:var(--accent);"></i> Novedades</h3>
+                        <p>Pendientes de atención en tu área</p>
+                    </div>
+                    <button onclick="iniciarReporteSupervisor()" class="btn-primary" style="width:auto; padding:8px 16px; font-size:12px; margin:0; height:auto; display:flex; align-items:center; gap:6px;">
+                        <i class="fas fa-plus"></i> Reportar
+                    </button>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:10px; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border)">
+                    <span style="font-size:12px; font-weight:600; color:var(--text-dim)">Filtrar:</span>
+                    <select id="sup-movil-filter" class="m-select" style="max-width:180px; padding:6px; font-size:12px; height:auto; margin:0;" onchange="renderSupervisorFeed()">
+                        <option value="pendientes" selected>Pendientes (0)</option>
+                        <option value="todos">Todos los reportes</option>
+                    </select>
+                </div>
+
+                <div id="sup-feed-container" style="max-height:calc(100vh - 195px); overflow-y:auto; display:flex; flex-direction:column; gap:12px; padding-right:4px;">
+                    <div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando novedades...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Confirmación Exitoso (Pop-up) -->
+        <div id="modal-success" class="modal-overlay hidden">
+            <div class="modal-success-card glass-card">
+                <div class="success-icon-wrapper">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>¡Reporte Enviado!</h3>
+                <p>La intervención ha sido guardada y sincronizada correctamente en la central SGTI.</p>
+                <button onclick="confirmarExito()" class="btn-primary">Aceptar <i class="fas fa-check"></i></button>
+            </div>
+        </div>
+
+        <!-- Selector de Video (Modal) -->
+        <div id="modal-video-selector" class="modal-overlay hidden" style="z-index: 100000;">
+            <div class="modal-success-card glass-card" style="width: 85%; max-width: 320px; text-align: center; padding: 24px; display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center;">
+                <div class="success-icon-wrapper" style="background: rgba(6, 182, 212, 0.1); color: var(--accent); margin-bottom: 5px;">
+                    <i class="fas fa-video"></i>
+                </div>
+                <h3 style="margin-bottom: 2px;">Evidencia en Video</h3>
+                <p style="font-size:12px; color:var(--text-dim); margin-bottom: 12px;">Elige cómo registrar el video</p>
+                <button onclick="seleccionarOpcionVideo('record')" class="btn-primary" style="width: 100%;"><i class="fas fa-camera"></i> Grabar con Cámara</button>
+                <button onclick="seleccionarOpcionVideo('gallery')" class="btn-secondary" style="width: 100%;"><i class="fas fa-images"></i> Elegir de Galería</button>
+                <button onclick="cerrarSelectorVideo()" class="btn-secondary" style="width: 100%; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- Selector de Foto (Modal) -->
+        <div id="modal-photo-selector" class="modal-overlay hidden" style="z-index: 100000;">
+            <div class="modal-success-card glass-card" style="width: 85%; max-width: 320px; text-align: center; padding: 24px; display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center;">
+                <div class="success-icon-wrapper" style="background: rgba(6, 182, 212, 0.1); color: var(--accent); margin-bottom: 5px;">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <h3 style="margin-bottom: 2px;">Evidencia Fotográfica</h3>
+                <p style="font-size:12px; color:var(--text-dim); margin-bottom: 12px;">Elige cómo registrar la foto</p>
+                <button onclick="seleccionarOpcionFoto('camera')" class="btn-primary" style="width: 100%;"><i class="fas fa-camera"></i> Tomar Foto</button>
+                <button onclick="seleccionarOpcionFoto('gallery')" class="btn-secondary" style="width: 100%;"><i class="fas fa-images"></i> Elegir de Galería</button>
+                <button onclick="cerrarSelectorFoto()" class="btn-secondary" style="width: 100%; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Ruta relativa: las llamadas van al mismo subdominio (carmen.gobernanzamunicipal.com/api)
+        // y el middleware detecta el tenant desde el host. No usar URL absoluta aquí.
+        const API_BASE = '/api';
+
+        // Solo completar si el backend exige X-Mobile-Api-Key para /reportes-movil.
+        // Recomendación: no publicar esta clave en repositorios.
+        const MOBILE_API_KEY = '';
+
+        let currentUser = null, map = null, marker = null, photosArray = [], videosArray = [];
+
+        // true mientras la cámara o la galería nativa están abiertas; en ese caso la app
+        // pasa a segundo plano pero NO debe cerrarse la sesión del operador.
+        let mediaEnCurso = false;
+
+        function buildHeaders(extra = {}) {
+            const headers = { ...extra };
+            const token = localStorage.getItem('sgti_mobile_token');
+
+            // Compatibilidad con versiones antiguas del backend que usaban Bearer token.
+            if (token) headers['Authorization'] = 'Bearer ' + token;
+
+            // Compatibilidad opcional con el endpoint móvil si exige API key.
+            if (MOBILE_API_KEY) headers['X-Mobile-Api-Key'] = MOBILE_API_KEY;
+
+            return headers;
+        }
+
+        function apiFetch(path, options = {}) {
+            return fetch(API_BASE + path, {
+                credentials: 'include',
+                ...options,
+                headers: buildHeaders(options.headers || {})
+            });
+        }
+        let currentCoords = { lat: -12.0425, lng: -77.0873 };
+        let manualAddress = null;
+
+        function toggleDireccionManual() {
+            const box = document.getElementById('manual-address-box');
+            box.classList.toggle('hidden');
+            if (!box.classList.contains('hidden')) {
+                document.getElementById('manual-address-input').focus();
+            }
+        }
+
+        // Distrito detectado automáticamente según el GPS del operador.
+        // Se usa para restringir la búsqueda de direcciones manuales a esa zona.
+        let zonaActual = null; // { nombre, viewbox }
+
+        async function detectarZona() {
+            try {
+                const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentCoords.lat}&lon=${currentCoords.lng}&zoom=12&addressdetails=1`);
+                const d = await r.json();
+                if (d && d.boundingbox && d.address) {
+                    const a = d.address;
+                    const nombre = a.city_district || a.district || a.borough || a.city || a.town || a.municipality || a.village || '';
+                    // boundingbox de Nominatim: [latMin, latMax, lonMin, lonMax]
+                    // viewbox de búsqueda: lonMin,latMax,lonMax,latMin
+                    const bb = d.boundingbox;
+                    if (nombre) {
+                        zonaActual = { nombre, viewbox: `${bb[2]},${bb[1]},${bb[3]},${bb[0]}` };
+                        console.log('Zona detectada para búsqueda de direcciones:', nombre);
+                    }
+                }
+            } catch (err) {
+                console.warn('No se pudo detectar el distrito actual:', err.message);
+            }
+        }
+
+        async function usarDireccionManual() {
+            const val = document.getElementById('manual-address-input').value.trim();
+            if (!val) { alert('Escribe la dirección de la incidencia.'); return; }
+            const btn = document.getElementById('btn-usar-direccion');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando...';
+
+            // Autodetectar la dirección para mover el pin del mapa.
+            // Si se conoce el distrito del operador, la búsqueda se restringe a esa zona.
+            let detectada = false;
+            try {
+                const q = encodeURIComponent(val + (zonaActual ? ', ' + zonaActual.nombre : '') + ', Peru');
+                let url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=pe&q=${q}`;
+                if (zonaActual) url += `&viewbox=${zonaActual.viewbox}&bounded=1`;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 7000);
+                const r = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                const results = await r.json();
+                if (results && results.length > 0) {
+                    currentCoords = { lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) };
+                    if (map) {
+                        map.setView([currentCoords.lat, currentCoords.lng], 18);
+                        marker.setLatLng([currentCoords.lat, currentCoords.lng]);
+                    }
+                    detectada = true;
+                }
+            } catch (err) {
+                console.warn('No se pudo geocodificar la dirección manual:', err.message);
+            }
+
+            manualAddress = val;
+            document.getElementById('current-address').textContent = val;
+            const icon = document.getElementById('address-mode-icon');
+            icon.className = 'fas fa-pen';
+            icon.style.color = '#f59e0b';
+            document.getElementById('manual-address-box').classList.add('hidden');
+            document.getElementById('btn-manual-address').innerHTML = '<i class="fas fa-pen"></i> Direccion Manual Activa (Editar)';
+            btn.innerHTML = '<i class="fas fa-check"></i> Usar esta direccion';
+
+            if (!detectada) {
+                const zonaTxt = zonaActual ? ' dentro de ' + zonaActual.nombre : '';
+                alert('No se encontró la dirección' + zonaTxt + '. Se usará el texto escrito; si lo deseas, ajusta el pin en el mapa manualmente.');
+            }
+        }
+
+        function cancelarDireccionManual() {
+            manualAddress = null;
+            document.getElementById('manual-address-input').value = '';
+            const icon = document.getElementById('address-mode-icon');
+            icon.className = 'fas fa-check-circle';
+            icon.style.color = 'var(--accent)';
+            document.getElementById('manual-address-box').classList.add('hidden');
+            document.getElementById('btn-manual-address').innerHTML = '<i class="fas fa-keyboard"></i> Escribir Direccion Manual';
+            updateAddress();
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.form-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            if (id === 'section-location' && map) { setTimeout(() => map.invalidateSize(), 300); }
+        }
+
+        async function ejecutarLogin(e) {
+            e.preventDefault();
+            const btn = document.querySelector('.login-card .btn-primary');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+            try {
+                const r = await apiFetch('/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: document.getElementById('login-user').value, password: document.getElementById('login-pass').value }) });
+                const d = await r.json();
+                if (!r.ok) throw new Error(d.error || 'Error');
+                if (d.token) localStorage.setItem('sgti_mobile_token', d.token);
+                else localStorage.removeItem('sgti_mobile_token');
+                localStorage.setItem('sgti_mobile_user', JSON.stringify(d.user));
+                currentUser = d.user;
+                setupUI();
+            } catch (err) { document.getElementById('login-error').textContent = err.message; btn.innerHTML = 'Ingresar <i class="fas fa-sign-in-alt"></i>'; }
+        }
+
+        let heartbeatInterval = null;
+        function setupUI() {
+            if (!currentUser) return;
+            let rolLabelHeader = currentUser.gerencia ? currentUser.gerencia.toUpperCase() : 'PERSONAL';
+            if (currentUser.rol === 'supervisor') {
+                rolLabelHeader = 'SUPERVISOR' + (currentUser.gerencia ? ' ' + currentUser.gerencia.toUpperCase() : '');
+            }
+            document.getElementById('logged-user-status').textContent = 'EN L\u00CDNEA: ' + currentUser.nombre + '  |  ' + rolLabelHeader;
+            document.getElementById('main-content').classList.remove('hidden');
+            
+            if (esRolGerencial()) { 
+                showSection('section-manager'); 
+                initManager(); 
+                iniciarNovedades(); 
+            } else if (currentUser.rol === 'supervisor') {
+                showSection('section-supervisor');
+                cargarNovedadesSupervisor();
+            } else { 
+                showSection('section-location'); 
+                initMap(); 
+            }
+
+            if (heartbeatInterval) clearInterval(heartbeatInterval);
+            apiFetch('/reportes-movil/ping', { method: 'POST' }).catch(() => {});
+            heartbeatInterval = setInterval(() => {
+                apiFetch('/reportes-movil/ping', { method: 'POST' }).catch(() => {});
+            }, 30000);
+        }
+
+        async function initManager() {
+            try {
+                const r = await apiFetch('/equipo/gerencias');
+                const gerencias = await r.json();
+                
+                let options = [];
+                if (currentUser.gerencia === 'all' || currentUser.gerencia === 'municipal') {
+                    options = gerencias.map(g => g.clave);
+                } else {
+                    const subAreasList = gerencias.filter(g => g.parentClave === currentUser.gerencia);
+                    options = subAreasList.map(g => g.clave);
+                }
+                
+                if (options.length === 0) {
+                    options = [currentUser.gerencia];
+                }
+                
+                document.getElementById('m-eq-area').innerHTML = options.map(opt => {
+                    const found = gerencias.find(g => g.clave === opt);
+                    const name = found ? found.nombre : opt;
+                    return '<option value="' + opt + '">' + name.toUpperCase() + '</option>';
+                }).join('');
+            } catch (err) {
+                const subAreas = { seguridad: ['serenazgo', 'fiscalizacion', 'transporte'] };
+                const options = subAreas[currentUser.gerencia] || [currentUser.gerencia];
+                document.getElementById('m-eq-area').innerHTML = options.map(opt => '<option value="' + opt + '">' + opt.toUpperCase() + '</option>').join('');
+            }
+            document.querySelectorAll('.tab-btn').forEach(btn => { btn.onclick = () => { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden')); btn.classList.add('active'); document.getElementById(btn.dataset.tab).classList.remove('hidden'); if (btn.dataset.tab === 'tab-lista') cargarPersonal(); if (btn.dataset.tab === 'tab-novedades') { cargarNovedades(); marcarNovedadesLeidas(); } }; });
+        }
+
+        async function cargarPersonal() {
+            const container = document.getElementById('m-lista-container');
+            try {
+                const r = await apiFetch('/equipo/personal');
+                const equipo = await r.json();
+                container.innerHTML = equipo.map(u => `<div class="person-card"><div class="person-info"><h4>${u.nombre}</h4><span class="area-tag">${u.gerencia}</span><span class="user-handle">@${u.username}</span></div><button class="btn-delete" style="background:rgba(248,113,113,0.1); color:#f87171; border:none; padding:10px; border-radius:10px;" onclick="eliminarUsuario('${u.id}')"><i class="fas fa-trash-alt"></i></button></div>`).join('');
+            } catch (err) { }
+        }
+
+        async function crearUsuarioMovil() { try { await apiFetch('/equipo/personal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nombre: document.getElementById('m-eq-nombre').value, username: document.getElementById('m-eq-user').value, password: document.getElementById('m-eq-pass').value, rol: 'operador', gerencia: document.getElementById('m-eq-area').value }) }); location.reload(); } catch (err) { } }
+        async function eliminarUsuario(id) { if (!confirm("¿Eliminar?")) return; try { await apiFetch('/equipo/personal/' + id, { method: 'DELETE' }); cargarPersonal(); } catch (err) { } }
+
+        // ===================== NOVEDADES (solo gerentes / subgerentes / admin) =====================
+        // Fuente de datos: GET /api/overview/notificaciones. El backend ya filtra por la gerencia
+        // del usuario e incluye los reportes derivados a su área (areasDerivadas). Aquí solo se
+        // muestran, se detectan los nuevos y se emite una notificación local del sistema.
+        const NOV_KNOWN_KEY = 'sgti_nov_known'; // IDs ya procesados (para no notificar dos veces)
+        const NOV_READ_KEY = 'sgti_nov_read';   // IDs ya vistos por el gerente (para el badge)
+        let novedadesInterval = null;
+        let ultimasNovedades = [];
+
+        function rolActual() {
+            if (currentUser && currentUser.rol) return currentUser.rol;
+            try { return (JSON.parse(localStorage.getItem('sgti_mobile_user') || '{}')).rol || null; } catch (e) { return null; }
+        }
+        function esRolGerencial() {
+            const rol = rolActual();
+            return rol === 'gerente' || rol === 'admin';
+        }
+
+        function getSet(key) { try { return new Set(JSON.parse(localStorage.getItem(key) || '[]')); } catch (e) { return new Set(); } }
+        function setSet(key, set) { localStorage.setItem(key, JSON.stringify(Array.from(set).slice(-100))); }
+
+        function getLocalNotifications() {
+            return (typeof Capacitor !== 'undefined' && Capacitor.Plugins) ? Capacitor.Plugins.LocalNotifications : null;
+        }
+        async function pedirPermisoNotificaciones() {
+            const LN = getLocalNotifications();
+            if (!LN) return;
+            try {
+                const perm = await LN.checkPermissions();
+                if (perm.display !== 'granted') await LN.requestPermissions();
+            } catch (e) { console.warn('No se pudo solicitar permiso de notificaciones:', e.message); }
+        }
+
+        async function iniciarNovedades() {
+            await pedirPermisoNotificaciones();
+            cargarNovedades({ inicial: true }); // primera carga: no notifica, solo puebla badge/known
+            if (novedadesInterval) clearInterval(novedadesInterval);
+            novedadesInterval = setInterval(() => cargarNovedades(), 40000);
+        }
+
+        // Normaliza un reporte del feed (/whatsapp/reportes) a la forma que usa la tarjeta de novedad.
+        function normalizarNovedad(r) {
+            const areas = Array.isArray(r.areasDerivadas) ? r.areasDerivadas : [];
+            return {
+                id: r.idString || String(r.id),
+                sender: r.reportadoPor || r.sender || 'Operador',
+                mensaje: (r.mensaje || r.body || '').replace(/^\[MÓVIL\]\s*/i, ''),
+                time: r.time || '',
+                estado: r.estado || 'nuevo',
+                prioridad: r.prioridad || 'Media',
+                color: r.color || '#fbbf24',
+                sector: r.sector || '',
+                ubicacion: r.ubicacion || '',
+                grupo: r.grupo || '',
+                areas: areas,
+                derivado: areas.length > 1 || !!r.esDerivacionMultiple
+            };
+        }
+
+        async function cargarNovedades(opts = {}) {
+            try {
+                // Mismo feed que la web (incidencias reales del personal + derivaciones entre áreas).
+                // El backend ya aplica RBAC por gerencia e incluye areasDerivadas.
+                const r = await apiFetch('/whatsapp/reportes?limit=30&orden=reciente');
+                if (!r.ok) return;
+                const d = await r.json();
+                const items = (d.reportes || []).map(normalizarNovedad);
+                ultimasNovedades = items;
+
+                const known = getSet(NOV_KNOWN_KEY);
+                const nuevas = items.filter(i => !known.has(i.id));
+                if (!opts.inicial && nuevas.length) notificarNuevas(nuevas);
+                items.forEach(i => known.add(i.id));
+                setSet(NOV_KNOWN_KEY, known);
+
+                // Si el gerente está mirando la pestaña, se marcan como leídas al instante.
+                const tab = document.getElementById('tab-novedades');
+                if (tab && !tab.classList.contains('hidden')) marcarNovedadesLeidas();
+
+                renderNovedades(items);
+                actualizarBadge();
+            } catch (e) { /* silencioso: no romper el dashboard si falla la red */ }
+        }
+
+        function renderNovedades(items) {
+            const c = document.getElementById('m-novedades-container');
+            if (!c) return;
+            if (!items.length) {
+                c.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:30px;"><i class="fas fa-check-circle" style="color:var(--accent); display:block; font-size:28px; margin-bottom:10px;"></i>Sin novedades pendientes.</p>';
+                return;
+            }
+            const read = getSet(NOV_READ_KEY);
+            const estadoLabel = { 'nuevo': 'Pendiente', 'en_proceso': 'En Proceso', 'en proceso': 'En Proceso', 'atendido': 'Atendido' };
+            c.innerHTML = items.map(n => {
+                const esNueva = !read.has(n.id);
+                const estKey = (n.estado || '').toLowerCase();
+                const eLabel = estadoLabel[estKey] || n.estado;
+                const lugar = n.ubicacion || n.sector || '';
+                const derivTag = n.derivado
+                    ? `<span class="nov-deriv"><i class="fas fa-share-square"></i> Derivado a: ${n.areas.join(', ')}</span>`
+                    : '';
+                return `<div class="nov-card${esNueva ? ' nov-nueva' : ''}">
+                    <div class="nov-dot" style="background:${n.color};"></div>
+                    <div class="nov-body">
+                        <div class="nov-top">
+                            <h4>${n.sender}</h4>
+                            <span class="nov-estado nov-est-${estKey.replace(/\s+/g, '_')}">${eLabel}</span>
+                        </div>
+                        <p>${n.mensaje || ''}</p>
+                        ${lugar ? `<span class="nov-loc"><i class="fas fa-map-marker-alt"></i> ${lugar}</span>` : ''}
+                        ${derivTag}
+                        <span class="nov-time"><i class="fas fa-clock"></i> ${n.time || ''}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function marcarNovedadesLeidas() {
+            const read = getSet(NOV_READ_KEY);
+            ultimasNovedades.forEach(n => read.add(n.id));
+            setSet(NOV_READ_KEY, read);
+            actualizarBadge();
+        }
+
+        function actualizarBadge() {
+            const badge = document.getElementById('novedades-badge');
+            if (!badge) return;
+            const read = getSet(NOV_READ_KEY);
+            const noLeidas = ultimasNovedades.filter(n => !read.has(n.id)).length;
+            if (noLeidas > 0) {
+                badge.textContent = noLeidas > 9 ? '9+' : String(noLeidas);
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        async function notificarNuevas(nuevas) {
+            const txt = nuevas.length === 1
+                ? (nuevas[0].derivado ? 'Novedad derivada de ' + nuevas[0].sender : 'Nueva incidencia de ' + nuevas[0].sender)
+                : nuevas.length + ' nuevas incidencias';
+            mostrarToast('🔔 ' + txt);
+            const LN = getLocalNotifications();
+            if (!LN) return;
+            try {
+                await LN.schedule({
+                    notifications: nuevas.slice(0, 5).map((n, i) => ({
+                        id: (Date.now() % 100000) + i,
+                        title: 'SGTI · ' + (n.derivado ? 'Novedad derivada' : 'Nueva incidencia'),
+                        body: n.sender + ': ' + (n.mensaje || '').substring(0, 90),
+                        schedule: { at: new Date(Date.now() + 200) }
+                    }))
+                });
+            } catch (e) { console.warn('No se pudo emitir la notificación local:', e.message); }
+        }
+
+        function mostrarToast(msg) {
+            let t = document.getElementById('sgti-toast');
+            if (!t) { t = document.createElement('div'); t.id = 'sgti-toast'; t.className = 'sgti-toast'; document.body.appendChild(t); }
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => t.classList.remove('show'), 4000);
+        }
+        // =========================================================================================
+
+        function initMap() { if (map) return; map = L.map('map', { zoomControl: false }).setView([currentCoords.lat, currentCoords.lng], 16); L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: 'abcd', maxZoom: 20 }).addTo(map); marker = L.marker([currentCoords.lat, currentCoords.lng], { draggable: true }).addTo(map); marker.on('dragend', () => { const pos = marker.getLatLng(); currentCoords = { lat: pos.lat, lng: pos.lng }; updateAddress(); }); recalibrarUbicacion(); }
+        async function recalibrarUbicacion() {
+            const geoOptions = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
+            
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Geolocation) {
+                try {
+                    const Geolocation = window.Capacitor.Plugins.Geolocation;
+                    const permission = await Geolocation.requestPermissions();
+                    const position = await Geolocation.getCurrentPosition(geoOptions);
+                    currentCoords = { lat: position.coords.latitude, lng: position.coords.longitude };
+                    if (map) {
+                        map.setView([currentCoords.lat, currentCoords.lng], 18);
+                        marker.setLatLng([currentCoords.lat, currentCoords.lng]);
+                    }
+                    updateAddress();
+                    detectarZona();
+                    return;
+                } catch (err) {
+                    console.warn('Capacitor native Geolocation error, falling back:', err.message);
+                }
+            }
+
+            if (!navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition(pos => {
+                currentCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                if (map) {
+                    map.setView([currentCoords.lat, currentCoords.lng], 18);
+                    marker.setLatLng([currentCoords.lat, currentCoords.lng]);
+                }
+                updateAddress();
+                detectarZona();
+            }, (err) => {
+                console.warn('Geolocation standard error:', err.message);
+                updateAddress();
+            }, geoOptions);
+        }
+        async function updateAddress() {
+            const addrEl = document.getElementById('current-address');
+            if (manualAddress) { addrEl.textContent = manualAddress; return; }
+            try {
+                const apiBase = (window.Capacitor && window.Capacitor.isNativePlatform())
+                  ? 'https://app.gobernanzamunicipal.com/api'
+                  : '/api';
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 6000);
+                const r = await fetch(
+                    `${apiBase}/reportes-movil/reverse-geocode?lat=${currentCoords.lat}&lng=${currentCoords.lng}`,
+                    { signal: controller.signal }
+                );
+                clearTimeout(timeoutId);
+                const d = await r.json(); 
+                if (d.address) {
+                    addrEl.textContent = d.address;
+                } else {
+                    addrEl.textContent = "Carmen de la Legua Reynoso, Callao";
+                }
+            } catch (err) { 
+                addrEl.textContent = "Carmen de la Legua Reynoso, Callao";
+                console.warn('Geocoding falló, mostrando fallback genérico:', err.message);
+            } 
+        }
+
+        function renderPhotos() {
+            const container = document.getElementById('photos-container');
+            container.innerHTML = '';
+            photosArray.forEach((photo, index) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'position:relative; width:80px; height:80px; border-radius:10px; border:2px solid var(--accent); overflow:hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3);';
+                
+                const img = document.createElement('img');
+                img.src = photo;
+                img.style.cssText = 'width:100%; height:100%; object-fit:cover;';
+                
+                const btnDel = document.createElement('button');
+                btnDel.innerHTML = '<i class="fas fa-times"></i>';
+                btnDel.style.cssText = 'position:absolute; top:2px; right:2px; background:rgba(239, 68, 68, 0.85); color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; display:flex; justify-content:center; align-items:center; cursor:pointer; z-index:10;';
+                btnDel.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    photosArray.splice(index, 1);
+                    renderPhotos();
+                };
+                
+                item.appendChild(img);
+                item.appendChild(btnDel);
+                container.appendChild(item);
+            });
+        }
+
+        function estamparMarcaAgua(rawBase64) {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                
+                // 1. Dibujar la foto original
+                ctx.drawImage(img, 0, 0);
+                
+                // 2. Configurar medidas dinámicas (Aumentamos barHeight para 3 filas)
+                const fontSize = Math.floor(canvas.height / 32);
+                const barHeight = fontSize * 5.0; // Más alto para 3 líneas
+                
+                // 3. Dibujar franja de seguridad (Degradado más sólido)
+                ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+                ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
+                
+                // 4. Preparar Datos
+                const now = new Date();
+                const fecha = now.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const hora = now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+                const timestamp = `${fecha}   |   ${hora.toUpperCase()}`;
+                
+                const ubicacionTexto = document.getElementById('current-address').textContent || 'Ubicación Desconocida';
+                const gpsCoords = `LAT: ${currentCoords.lat.toFixed(5)}, LNG: ${currentCoords.lng.toFixed(5)}`;
+                
+                // 5. Estampar FECHA Y HORA (Fila 1 - Superior)
+                ctx.textAlign = "center";
+                ctx.fillStyle = "#ffffff";
+                ctx.font = `bold ${fontSize * 1.1}px 'Outfit', Arial`;
+                ctx.fillText(timestamp, canvas.width / 2, canvas.height - (barHeight * 0.70));
+                
+                // 6. Estampar GPS y UBICACIÓN (Fila 2 - Medio)
+                ctx.font = `500 ${fontSize * 0.70}px 'Outfit', Arial`;
+                ctx.fillStyle = "#4f8ff7"; // Color azul/celeste
+                ctx.fillText(`📍 ${ubicacionTexto.substring(0, 45)} | ${gpsCoords}`, canvas.width / 2, canvas.height - (barHeight * 0.40));
+ 
+                // 7. Estampar IDENTIDAD (Fila 3 - Inferior)
+                ctx.font = `500 ${fontSize * 0.75}px 'Outfit', Arial`;
+                ctx.fillStyle = "rgba(255,255,255,0.8)";
+                ctx.fillText("SGTI | MUNICIPALIDAD DE CARMEN DE LA LEGUA", canvas.width / 2, canvas.height - (barHeight * 0.15));
+                
+                // 8. Decoración: Línea divisoria central sutil
+                ctx.strokeStyle = "rgba(6, 182, 212, 0.4)";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(canvas.width * 0.2, canvas.height - (barHeight * 0.55));
+                ctx.lineTo(canvas.width * 0.8, canvas.height - (barHeight * 0.55));
+                ctx.stroke();
+                
+                // Guardar y mostrar
+                const processedPhoto = canvas.toDataURL('image/jpeg', 0.85);
+                photosArray.push(processedPhoto);
+                renderPhotos();
+                
+                console.log("✅ Evidencia estampada con éxito: " + timestamp);
+            };
+            img.src = rawBase64;
+        }
+
+        async function tomarFoto() { 
+            try { 
+                const { Camera } = typeof Capacitor !== 'undefined' ? Capacitor.Plugins : { Camera: null };
+                if (!Camera) return;
+
+                mediaEnCurso = true;
+                const image = await Camera.getPhoto({
+                    quality: 60, 
+                    width: 800, 
+                    resultType: 'Base64',
+                    correctOrientation: true,
+                    saveToGallery: true,
+                    source: 'CAMERA' // Abre directamente la cámara nativa para evitar menús en inglés
+                }); 
+                
+                const rawBase64 = 'data:image/jpeg;base64,' + image.base64String;
+                estamparMarcaAgua(rawBase64);
+                
+            } catch (err) { 
+                console.error("Error al capturar/procesar foto:", err); 
+            } 
+        }
+
+        // Fotos de galería: NO se estampa fecha/hora/ubicación (pueden ser de otra cámara u otro momento).
+        // Solo se redimensionan y comprimen para que el envío sea ligero, igual que las de cámara.
+        function procesarFotoGaleria(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = () => {
+                    const maxWidth = 800;
+                    const scale = Math.min(1, maxWidth / img.width);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.round(img.width * scale);
+                    canvas.height = Math.round(img.height * scale);
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    photosArray.push(canvas.toDataURL('image/jpeg', 0.85));
+                    renderPhotos();
+                };
+                img.src = e.target.result;
+                input.value = "";
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function procesarVideo(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            
+            if (file.size > 20 * 1024 * 1024) {
+                alert("El video es muy pesado. Por favor selecciona un video menor a 20MB.");
+                input.value = "";
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                videosArray.push(e.target.result);
+                renderVideos();
+                input.value = "";
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderVideos() {
+            const container = document.getElementById('videos-container');
+            container.innerHTML = '';
+            videosArray.forEach((video, index) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'position:relative; width:80px; height:80px; border-radius:10px; border:2px solid var(--accent); overflow:hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3); background:#1e293b; display:flex; justify-content:center; align-items:center;';
+                
+                const vid = document.createElement('video');
+                vid.src = video;
+                vid.style.cssText = 'width:100%; height:100%; object-fit:cover;';
+                vid.muted = true;
+                vid.playsInline = true;
+                vid.preload = 'metadata';
+                
+                const playOverlay = document.createElement('div');
+                playOverlay.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0, 0, 0, 0.4); display:flex; justify-content:center; align-items:center; pointer-events:none; z-index:2;';
+                playOverlay.innerHTML = '<i class="fas fa-play" style="color:#ffffff; font-size:18px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></i>';
+                
+                const label = document.createElement('div');
+                label.style.cssText = 'position:absolute; bottom:0; left:0; width:100%; background:rgba(6, 182, 212, 0.85); color:#ffffff; font-size:8px; font-weight:bold; text-align:center; padding:2px 0; z-index:3; text-transform:uppercase; letter-spacing:0.5px; font-family:\'Outfit\', sans-serif; pointer-events:none;';
+                label.textContent = 'Video';
+                
+                const btnDel = document.createElement('button');
+                btnDel.innerHTML = '<i class="fas fa-times"></i>';
+                btnDel.style.cssText = 'position:absolute; top:2px; right:2px; background:rgba(239, 68, 68, 0.95); color:white; border:none; border-radius:50%; width:18px; height:18px; font-size:8px; display:flex; justify-content:center; align-items:center; cursor:pointer; z-index:10; box-shadow: 0 2px 5px rgba(0,0,0,0.3);';
+                btnDel.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    videosArray.splice(index, 1);
+                    renderVideos();
+                };
+                
+                item.appendChild(vid);
+                item.appendChild(playOverlay);
+                item.appendChild(label);
+                item.appendChild(btnDel);
+                container.appendChild(item);
+            });
+        }
+
+        async function enviarReporte() { 
+            const desc = document.getElementById('report-description').value; 
+            if (!desc) return; 
+            const btn = document.getElementById('btn-enviar'); 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...'; 
+            
+            const payload = { 
+                mensaje: desc, 
+                categoria: currentUser.gerencia, 
+                lat: currentCoords.lat, 
+                lng: currentCoords.lng, 
+                prioridad: document.getElementById('report-priority').value, 
+                estado: document.getElementById('report-status').value, 
+                ubicacion: manualAddress || document.getElementById('current-address').textContent,
+                direccionManual: !!manualAddress,
+                fotoUrl: photosArray.length > 0 ? JSON.stringify(photosArray) : null,
+                videoUrl: videosArray.length > 0 ? JSON.stringify(videosArray) : null,
+                tipoAgente: document.getElementById('report-agent-type').value
+            }; 
+            
+            try { 
+                const r = await apiFetch('/reportes-movil', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(payload) 
+                }); 
+                if (r.ok) {
+                    document.getElementById('modal-success').classList.remove('hidden');
+                } else { 
+                    btn.innerHTML = 'Enviar Reporte <i class="fas fa-paper-plane"></i>'; 
+                } 
+            } catch (err) { 
+                btn.innerHTML = 'Enviar Reporte <i class="fas fa-paper-plane"></i>'; 
+            } 
+        }
+
+        function confirmarExito() {
+            if (currentUser && currentUser.rol === 'supervisor') {
+                document.getElementById('report-description').value = '';
+                photosArray = [];
+                videosArray = [];
+                document.getElementById('photos-container').innerHTML = '';
+                document.getElementById('videos-container').innerHTML = '';
+                document.getElementById('modal-success').classList.add('hidden');
+                document.getElementById('btn-enviar').innerHTML = 'Enviar Reporte <i class="fas fa-paper-plane"></i>';
+                showSection('section-supervisor');
+                cargarNovedadesSupervisor();
+            } else {
+                location.reload();
+            }
+        }
+
+        let supervisorFeedData = [];
+        async function cargarNovedadesSupervisor() {
+            const container = document.getElementById('sup-feed-container');
+            if (!container) return;
+            container.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Cargando novedades...</div>';
+            try {
+                const r = await apiFetch('/whatsapp/feed/' + currentUser.gerencia);
+                const response = await r.json();
+                supervisorFeedData = response.feed ? response.feed : (Array.isArray(response) ? response : []);
+                renderSupervisorFeed();
+            } catch (err) {
+                container.innerHTML = `<div style="text-align:center; padding:20px; color:#f87171;">Error: ${err.message}</div>`;
+            }
+        }
+
+        function renderSupervisorFeed() {
+            const container = document.getElementById('sup-feed-container');
+            const filterVal = document.getElementById('sup-movil-filter')?.value || 'pendientes';
+            
+            const pendingCount = supervisorFeedData.filter(m => m.estado !== 'atendido').length;
+            const filterSelect = document.getElementById('sup-movil-filter');
+            if (filterSelect) {
+                filterSelect.options[0].textContent = `Pendientes (${pendingCount})`;
+            }
+
+            let filtered = supervisorFeedData;
+            if (filterVal === 'pendientes') {
+                filtered = supervisorFeedData.filter(m => m.estado !== 'atendido');
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-dim); font-size:13px;">No hay reportes en esta sección.</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(msg => {
+                const isAttended = msg.estado === 'atendido';
+                const labelState = isAttended ? 'Atendido' : (msg.estado === 'en_proceso' ? 'En Proceso' : 'Pendiente');
+                const colorState = isAttended ? 'var(--success)' : (msg.estado === 'en_proceso' ? '#fbbf24' : 'var(--danger)');
+                
+                let actionBtn = '';
+                if (!isAttended) {
+                    actionBtn = `<button class="btn-primary" style="width:auto; padding:6px 12px; font-size:12px; margin:0;" onclick="atenderIncidenciaSupervisor('${msg.idString}')">Marcar Atendido</button>`;
+                } else {
+                    actionBtn = `<button class="btn-secondary" style="width:auto; padding:6px 12px; font-size:12px; margin:0; border-color:var(--text-dim); color:var(--text-dim);" onclick="desatenderIncidenciaSupervisor('${msg.idString}')">Marcar Pendiente</button>`;
+                }
+
+                return `
+                    <div style="background:var(--card); border:1px solid var(--border); padding:14px; border-radius:12px; display:flex; flex-direction:column; gap:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-dim);">
+                            <strong>👤 ${msg.sender || 'Anónimo'}</strong>
+                            <span>${msg.time || 'Hoy'}</span>
+                        </div>
+                        <div style="font-size:13px; line-height:1.4; color:var(--text);">${msg.body || 'Imagen/Documento adjunto'}</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; border-top:1px solid var(--border); padding-top:8px;">
+                            <span class="tag" style="background:rgba(255,255,255,0.05); border:1px solid ${colorState}; color:${colorState}; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600;">${labelState}</span>
+                            ${actionBtn}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function atenderIncidenciaSupervisor(idString) {
+            if (!confirm("¿Marcar esta novedad como Atendida?")) return;
+            try {
+                const r = await apiFetch('/whatsapp/reportes/' + idString, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: 'atendido' })
+                });
+                if (r.ok) {
+                    cargarNovedadesSupervisor();
+                }
+            } catch (err) {
+                alert("Error al actualizar: " + err.message);
+            }
+        }
+
+        async function desatenderIncidenciaSupervisor(idString) {
+            if (!confirm("¿Marcar esta novedad como Pendiente?")) return;
+            try {
+                const r = await apiFetch('/whatsapp/reportes/' + idString, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: 'nuevo' })
+                });
+                if (r.ok) {
+                    cargarNovedadesSupervisor();
+                }
+            } catch (err) {
+                alert("Error al actualizar: " + err.message);
+            }
+        }
+
+        function iniciarReporteSupervisor() {
+            const btnVolver = document.getElementById('btn-volver-supervisor');
+            const btnSig = document.getElementById('btn-siguiente-location');
+            if (btnVolver) {
+                btnVolver.classList.remove('hidden');
+                btnVolver.style.display = 'block';
+            }
+            if (btnSig) {
+                btnSig.style.flex = '1';
+            }
+            showSection('section-location');
+            initMap();
+        }
+
+        function volverSupervisor() {
+            const btnVolver = document.getElementById('btn-volver-supervisor');
+            if (btnVolver) {
+                btnVolver.classList.add('hidden');
+                btnVolver.style.display = 'none';
+            }
+            showSection('section-supervisor');
+            cargarNovedadesSupervisor();
+        }
+        function abrirSelectorVideo() {
+            document.getElementById('modal-video-selector').classList.remove('hidden');
+        }
+        function cerrarSelectorVideo() {
+            document.getElementById('modal-video-selector').classList.add('hidden');
+        }
+        function seleccionarOpcionVideo(opcion) {
+            cerrarSelectorVideo();
+            if (opcion === 'record') {
+                mediaEnCurso = true;
+                document.getElementById('input-video-record').click();
+            } else if (opcion === 'gallery') {
+                mediaEnCurso = true;
+                document.getElementById('input-video-gallery').click();
+            }
+        }
+        function abrirSelectorFoto() {
+            document.getElementById('modal-photo-selector').classList.remove('hidden');
+        }
+        function cerrarSelectorFoto() {
+            document.getElementById('modal-photo-selector').classList.add('hidden');
+        }
+        function seleccionarOpcionFoto(opcion) {
+            cerrarSelectorFoto();
+            if (opcion === 'camera') {
+                tomarFoto();
+            } else if (opcion === 'gallery') {
+                mediaEnCurso = true;
+                document.getElementById('input-photo-gallery').click();
+            }
+        }
+        async function logoutMobile() { try { await apiFetch('/auth/logout', { method: 'POST' }); } catch (err) {} localStorage.clear(); location.reload(); }
+
+        // --- Cierre de sesión automático tras 5 minutos fuera del aplicativo ---
+        // Al minimizar o cerrar la app se guarda la hora de salida. Si el operador
+        // vuelve antes de 5 minutos, la sesión se mantiene; si pasan más de 5 minutos
+        // (o reabre la app después de ese tiempo), se cierra la sesión y debe loguearse.
+        // Excepción: cuando la app pasa a segundo plano porque se abrió la cámara o la
+        // galería desde el propio aplicativo (mediaEnCurso), no corre el contador.
+        const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
+        const BG_TIME_KEY = 'sgti_mobile_bg_time';
+
+        function sesionExpirada() {
+            const t = parseInt(localStorage.getItem(BG_TIME_KEY), 10);
+            localStorage.removeItem(BG_TIME_KEY);
+            return t && (Date.now() - t) > SESSION_TIMEOUT_MS;
+        }
+
+        function cerrarSesionPorInactividad() {
+            // keepalive permite que el logout llegue al servidor aunque la app
+            // esté recargándose o en segundo plano.
+            try {
+                fetch(API_BASE + '/auth/logout', { method: 'POST', credentials: 'include', keepalive: true, headers: buildHeaders() });
+            } catch (err) {}
+            localStorage.clear();
+            currentUser = null;
+            location.reload();
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                if (mediaEnCurso) return;
+                const haySesion = currentUser || localStorage.getItem('sgti_mobile_user') || localStorage.getItem('sgti_mobile_token');
+                if (!haySesion) return;
+                // Los gerentes/subgerentes/admin mantienen la sesión abierta para seguir
+                // recibiendo notificaciones de novedades; el auto-cierre solo aplica a operadores.
+                if (esRolGerencial()) return;
+                localStorage.setItem(BG_TIME_KEY, Date.now().toString());
+            } else {
+                mediaEnCurso = false;
+                if (sesionExpirada()) cerrarSesionPorInactividad();
+            }
+        });
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Si la app se cerró por completo y se reabre pasados los 5 minutos,
+            // se invalida la sesión anterior antes de intentar restaurarla.
+            if (sesionExpirada()) {
+                try { await apiFetch('/auth/logout', { method: 'POST' }); } catch (err) {}
+                localStorage.clear();
+                currentUser = null;
+                return;
+            }
+            try {
+                const r = await apiFetch('/auth/me');
+                if (r.ok) {
+                    const d = await r.json();
+                    currentUser = d.user || d;
+                    localStorage.setItem('sgti_mobile_user', JSON.stringify(currentUser));
+                    setupUI();
+                    return;
+                }
+            } catch (err) { }
+
+            localStorage.removeItem('sgti_mobile_token');
+            localStorage.removeItem('sgti_mobile_user');
+        });
+    </script>
+</body>
+</html>
+
+

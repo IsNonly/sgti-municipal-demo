@@ -1,0 +1,3156 @@
+<!DOCTYPE html>
+<html lang="es" class="light-mode">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGTI Municipal</title>
+  <script>
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      window.location.replace('/mobile.html');
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="/data/leaflet-heat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <script type="module" crossorigin src="/assets/main-BtgStEM7.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/preload-helper-B--W30Oa.js">
+  <link rel="modulepreload" crossorigin href="/assets/dist-CeAEgxSN.js">
+  <link rel="modulepreload" crossorigin href="/assets/definitions-B-my8oJV.js">
+  <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-WNZMJCWm.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-MlggCwql.js">
+  <link rel="modulepreload" crossorigin href="/assets/pdf-YDm7HY-z.js">
+  <link rel="modulepreload" crossorigin href="/assets/whatsapp-MnyjjkZa.js">
+  <link rel="modulepreload" crossorigin href="/assets/maps-Brdr0nWp.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-BlhAtMqp.css">
+  <style>
+    /* Escudo en login sin fondo azul */
+    .login-logo-icon {
+      background: transparent !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      width: auto !important;
+      height: auto !important;
+    }
+    .login-logo-icon:after { display: none !important; }
+    .login-logo-icon img {
+      width: 80px !important;
+      height: 80px !important;
+      object-fit: contain !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app-root">
+    <!-- El contenido de login o del dashboard se cargará aquí dinámicamente -->
+    <div style="display:flex; justify-content:center; align-items:center; height:100vh; background-color:#0a0a0a; color:#ffffff; font-family:'Inter', sans-serif;">
+      <div style="text-align:center;">
+        <div style="width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
+        <div style="font-size:14px; font-weight:600; letter-spacing:0.5px;">Cargando SGTI...</div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    #overview-date-bar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--card, #1e1e2e);
+      border-bottom: 1px solid var(--border, #2a2a3e);
+      flex-wrap: wrap;
+    }
+    #overview-date-bar label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted, #888);
+      white-space: nowrap;
+    }
+    #overview-date-bar input[type="date"] {
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border, #2a2a3e);
+      background: var(--bg, #0f0f1a);
+      color: var(--text, #e2e8f0);
+      font-size: 12px;
+      cursor: pointer;
+    }
+    #overview-date-bar button {
+      padding: 5px 14px;
+      border-radius: 6px;
+      border: none;
+      background: var(--blue, #3b82f6);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #overview-date-bar button:hover { opacity: 0.85; }
+    /* ── Superadmin Analytics ── */
+    .sa-panel { margin-bottom: 28px; }
+    .sa-panel-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    }
+    .sa-panel-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--blue, #3b7dd4), #a78bfa);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    #sa-refresh-btn {
+      margin-left: auto; background: none; border: 1px solid var(--border);
+      color: var(--text-muted); border-radius: 8px; padding: 5px 12px;
+      cursor: pointer; font-size: 12px; font-family: inherit;
+    }
+    #sa-refresh-btn:hover { color: var(--blue); border-color: var(--blue); }
+    /* KPI bar — single connected strip, always visible */
+    .sa-kpi-strip {
+      display: flex; margin-bottom: 22px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .sa-kpi-chip {
+      flex: 1; text-align: center; padding: 14px 8px;
+      border-right: 1px solid var(--border);
+    }
+    .sa-kpi-chip:last-child { border-right: none; }
+    .sa-kv { font-size: 20px; font-weight: 800; line-height: 1; }
+    .sa-kl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin-top: 5px; }
+    /* Section separator */
+    .sa-sep {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--text-muted);
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+    }
+    .sa-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    /* Inside tenant cards */
+    .sa-tc-hdr { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+    .sa-tc-av {
+      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800; color: #fff;
+    }
+    .sa-tc-name { font-size: 13px; font-weight: 700; line-height: 1.3; color: var(--text); }
+    .sa-tc-sub  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .sa-tc-badge {
+      margin-left: auto; flex-shrink: 0; font-size: 9px; font-weight: 700;
+      padding: 3px 8px; border-radius: 20px; letter-spacing: .04em; text-transform: uppercase;
+    }
+    .sa-tc-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+    .sa-tc-stat {
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 6px; text-align: center;
+    }
+    .sa-tc-sv { font-size: 18px; font-weight: 800; line-height: 1; }
+    .sa-tc-sl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin-top: 4px; }
+    .sa-tc-ft {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; color: var(--text-muted);
+      padding-top: 12px; border-top: 1px solid var(--border);
+    }
+    .sa-tc-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+
+    #overview-periodo-label {
+      font-size: 11px;
+      color: var(--text-muted, #888);
+      margin-left: auto;
+    }
+
+    /* ── Modal municipio: estilos de refuerzo (el grueso va por JS) ── */
+    #tenant-modal { backdrop-filter: blur(3px) !important; }
+    #district-dropdown { background:#fff !important; border-color:#cbd5e1 !important; box-shadow:0 8px 24px rgba(0,0,0,.15) !important; }
+    #district-map-msg { color:#2a5fa8 !important; font-weight:600; }
+
+  </style>
+
+  <script>
+  // Observer: quita fondo azul del contenedor del escudo cuando el img aparece
+  (function() {
+    var _obs = new MutationObserver(function() {
+      var c = document.getElementById('login-logo-container');
+      if (!c) return;
+      if (c.querySelector('img')) {
+        c.style.cssText = 'background:transparent!important;box-shadow:none!important;border-radius:0!important;width:auto!important;height:auto!important;padding:0!important;';
+        var img = c.querySelector('img');
+        if (img) img.style.cssText = 'width:80px!important;height:80px!important;object-fit:contain!important;';
+        _obs.disconnect();
+      }
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+      _obs.observe(document.body, { childList: true, subtree: true });
+    });
+  })();
+  </script>
+
+  <script>
+  (function() {
+    // Mantener ?tenant= siempre visible en la URL al navegar dentro del SPA
+    function _addTenantToUrl(url) {
+      if (!url) return url;
+      const tenant = localStorage.getItem('sgti_tenant');
+      if (!tenant) return url;
+      if (url.includes('tenant=')) return url;
+      try {
+        const u = localStorage.getItem('sgti_user');
+        const userObj = u ? JSON.parse(u) : null;
+        if (userObj && (userObj.rol === 'superadmin' || userObj.role === 'superadmin')) return url;
+      } catch(e) {}
+      return url + (url.includes('?') ? '&' : '?') + 'tenant=' + encodeURIComponent(tenant);
+    }
+    const _replaceState = history.replaceState.bind(history);
+    const _pushState    = history.pushState.bind(history);
+    history.replaceState = function(s, t, url) { return _replaceState(s, t, _addTenantToUrl(url)); };
+    history.pushState    = function(s, t, url) { return _pushState(s,    t, _addTenantToUrl(url)); };
+  })();
+  </script>
+
+  <script>
+  (function() {
+    // Estado global de fechas — inicializa siempre en hoy
+    const todayInit = new Date().toLocaleDateString('en-CA');
+    window._sgtiDateFilter = { from: todayInit, to: todayInit };
+
+    const origFetch = window.fetch;
+    window.fetch = function(url, options) {
+      if (typeof url === 'string' &&
+          (url.includes('/whatsapp/stats') || url.includes('/whatsapp/reportes'))) {
+        try {
+          const u = new URL(url, window.location.origin);
+          // Solo inyectar si el caller no pasó sus propias fechas
+          if (!u.searchParams.has('from') || u.searchParams.get('from') === '') {
+            u.searchParams.set('from', window._sgtiDateFilter.from);
+            u.searchParams.set('to',   window._sgtiDateFilter.to);
+            url = u.toString();
+          }
+        } catch(e) {}
+      }
+      return origFetch.call(this, url, options);
+    };
+
+    // Inyectar barra de fechas cuando el SPA renderice la vista overview
+    const observer = new MutationObserver(() => {
+      const overviewView = document.getElementById('view-overview');
+      if (!overviewView || document.getElementById('overview-date-bar')) return;
+
+      const today = new Date().toLocaleDateString('en-CA');
+      const bar = document.createElement('div');
+      bar.id = 'overview-date-bar';
+      bar.innerHTML = `
+        <label>Período:</label>
+        <input type="date" id="ov-from" value="${today}" max="${today}">
+        <span style="color:var(--text-muted,#888);font-size:12px;">→</span>
+        <input type="date" id="ov-to"   value="${today}" max="${today}">
+        <button onclick="window.recargarOverviewStats()">Aplicar</button>
+        <span id="overview-periodo-label">Mostrando: hoy</span>
+      `;
+      overviewView.insertBefore(bar, overviewView.firstChild);
+      bar.style.display = 'flex';
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    window.recargarOverviewStats = function() {
+      const fromEl = document.getElementById('ov-from');
+      const toEl   = document.getElementById('ov-to');
+      const label  = document.getElementById('overview-periodo-label');
+      if (!fromEl || !toEl) return;
+
+      const today = new Date().toLocaleDateString('en-CA');
+      const from = fromEl.value, to = toEl.value;
+
+      // Actualizar estado global para que todas las vistas usen el mismo rango
+      window._sgtiDateFilter = { from, to };
+
+      if (label) {
+        label.textContent = (from === today && to === today) ? 'Mostrando: hoy'
+          : from === to ? `Mostrando: ${from}` : `Mostrando: ${from} → ${to}`;
+      }
+
+      if (window.showView) window.showView('overview');
+    };
+
+    // ── Caché local de provincia por nombre de distrito ──────────────────────────
+    // Poblado en _districtSelect; usado por _fillTenantLogos antes de que BD responda.
+    window._provByNombre = new Map();
+
+    // Caché de tenants (poblado al interceptar renderTenantsList)
+    let _cachedTenants = [];
+
+    // ── Superadmin Analytics + auto-logo de columna ───────────────────────────
+    let _origRenderTenants, _saDebounce;
+    Object.defineProperty(window, 'renderTenantsList', {
+      configurable: true,
+      get() { return _origRenderTenants; },
+      set(fn) {
+        _origRenderTenants = async function(...args) {
+          const r = await fn.apply(this, args);
+          // Capturar la lista actual de tenants desde la API (para nombreProvincia)
+          try {
+            const tk = localStorage.getItem('sgti_token') || '';
+            const res = await fetch('/api/superadmin/tenants', { headers: { Authorization: `Bearer ${tk}` } });
+            if (res.ok) _cachedTenants = await res.json();
+          } catch(e) {}
+          clearTimeout(_saDebounce);
+          _saDebounce = setTimeout(() => window._loadSaAnalytics?.(), 400);
+          setTimeout(() => window._fillTenantLogos?.(), 200);
+          return r;
+        };
+      }
+    });
+
+    // Rellena la columna logo para tenants sin logoUrl guardado
+    window._fillTenantLogos = async function() {
+      const tbody = document.getElementById('tenants-table-body');
+      if (!tbody) return;
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      for (const row of rows) {
+        const logoCell = row.cells[1];
+        if (!logoCell || logoCell.querySelector('img')) continue;
+        const nameCell = row.cells[2];
+        if (!nameCell) continue;
+        const nombre = (nameCell.getAttribute('title') || nameCell.textContent).trim();
+        const tenant = _cachedTenants.find(t => (t.nombreDistrito || t.nombre) === nombre);
+        const prov   = tenant?.nombreProvincia || window._provByNombre?.get(nombre) || '';
+        try {
+          const params = new URLSearchParams({ dist: nombre, prov });
+          const res = await fetch(`/api/superadmin/escudo-lookup?${params}`);
+          const d   = await res.json();
+          if (d.url) {
+            logoCell.innerHTML = `<img src="${d.url}" style="height:30px;width:46px;object-fit:contain;border-radius:4px;">`;
+          }
+        } catch(e) {}
+      }
+    };
+
+    window._saCharts = {};
+
+    window._loadSaAnalytics = async function() {
+      const view = document.getElementById('view-superadmin');
+      if (!view) return;
+
+      // Inyectar panel si no existe
+      if (!document.getElementById('sa-analytics-panel')) {
+        const panel = document.createElement('div');
+        panel.id = 'sa-analytics-panel';
+        panel.className = 'sa-panel';
+        panel.innerHTML = `
+          <div class="sa-panel-header">
+            <div class="sa-panel-icon">🏛</div>
+            <div>
+              <div style="font-size:15px;font-weight:700">Red Municipal SaaS</div>
+              <div style="font-size:11px;color:var(--text-muted);font-weight:400;margin-top:1px">Panel de analíticas en tiempo real</div>
+            </div>
+            <button id="sa-refresh-btn" onclick="window._loadSaAnalytics()" title="Actualizar">↺ Actualizar</button>
+          </div>
+          <div id="sa-kpis"></div>
+          <div id="sa-tenants-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px"></div>
+        `;
+        view.insertBefore(panel, view.firstChild);
+      }
+
+      // Loading state
+      const kpisEl = document.getElementById('sa-kpis');
+      if (kpisEl) kpisEl.innerHTML = '<span style="color:var(--text-muted);font-size:13px">Cargando...</span>';
+
+      try {
+        const token = localStorage.getItem('sgti_token');
+        const tnt   = localStorage.getItem('sgti_tenant');
+        const url   = '/api/superadmin/analytics' + (tnt ? `?tenant=${tnt}` : '');
+        const resp  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        const data  = await resp.json();
+        if (!data.tenants) throw new Error(data.error || 'Sin datos');
+        window._renderSaAnalytics(data);
+      } catch (e) {
+        const kpis = document.getElementById('sa-kpis');
+        if (kpis) kpis.innerHTML = `<span style="color:var(--red)">Error cargando analíticas: ${e.message}</span>`;
+      }
+    };
+
+    window._renderSaAnalytics = function(data) {
+      const tenants = data.tenants || [];
+      const activos = tenants.filter(t => t.estado === 'activo');
+      const ChartJS = window.Chart;
+
+      // ── Barra resumen de red ──
+      const totalR = tenants.reduce((s, t) => s + (t.totalReportes || 0), 0);
+      const totalH = tenants.reduce((s, t) => s + (t.reportesHoy  || 0), 0);
+      const totalM = tenants.reduce((s, t) => s + (t.reportesMes  || 0), 0);
+      const totalU = tenants.reduce((s, t) => s + (t.usuarios      || 0), 0);
+      const S = {
+        strip:  'display:flex;margin-bottom:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden',
+        chip:   'flex:1;text-align:center;padding:14px 8px;border-right:1px solid var(--border)',
+        chipL:  'flex:1;text-align:center;padding:14px 8px',
+        val:    'display:block;font-size:22px;font-weight:800;line-height:1',
+        lbl:    'display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-top:5px',
+        sep:    'display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted)',
+        sepLine:'display:block;flex:1;height:1px;background:var(--border)',
+      };
+      const chip = (val, lbl, color, last) =>
+        `<div style="${last ? S.chipL : S.chip}">
+           <span style="${S.val};color:${color||'var(--text)'}">${val}</span>
+           <span style="${S.lbl}">${lbl}</span>
+         </div>`;
+      const kpisEl = document.getElementById('sa-kpis');
+      if (kpisEl) kpisEl.innerHTML = `
+        <div style="${S.strip}">
+          ${chip(tenants.length,               'Municipios',   'var(--blue)')}
+          ${chip(activos.length,               'Activos',      '#22c55e')}
+          ${chip(tenants.length-activos.length,'Suspendidos',  '#ef4444')}
+          ${chip(totalH.toLocaleString(),      'Hoy',          '#f59e0b')}
+          ${chip(totalM.toLocaleString(),      'Este Mes',     '')}
+          ${chip(totalR.toLocaleString(),      'Total',        '')}
+          ${chip(totalU.toLocaleString(),      'Usuarios',     '',  true)}
+        </div>
+        <div style="${S.sep}">
+          Municipios — ${tenants.length}
+          <span style="${S.sepLine}"></span>
+        </div>
+      `;
+
+      // ── Destruir charts previos ──
+      Object.keys(window._saCharts).forEach(k => {
+        if (k.startsWith('sa-te-')) { window._saCharts[k].destroy(); delete window._saCharts[k]; }
+      });
+
+      const grid = document.getElementById('sa-tenants-grid');
+      if (!grid) return;
+
+      const isDark    = !document.documentElement.classList.contains('light-mode');
+      const textColor = isDark ? '#94a3b8' : '#334155';
+      const eColors   = { nuevo: '#f87171', en_proceso: '#fbbf24', atendido: '#34d399' };
+      const eLabels   = { nuevo: 'Nuevo', en_proceso: 'En proceso', atendido: 'Atendido' };
+      const ACCENT    = ['#4f8ff7','#34d399','#fbbf24','#a78bfa','#22d3ee','#fb923c','#f472b6'];
+      const ahora     = new Date();
+
+      const sorted = [...tenants].sort((a, b) => {
+        if (a.estado === b.estado) return b.reportesHoy - a.reportesHoy;
+        return a.estado === 'activo' ? -1 : 1;
+      });
+
+      grid.innerHTML = sorted.map((t, i) => {
+        const activo = t.estado === 'activo';
+        const last   = t.ultimaActividad ? new Date(t.ultimaActividad) : null;
+        const diffH  = last ? Math.round((ahora - last) / 36e5) : null;
+        const actLbl = !last ? 'Sin actividad'
+                     : diffH < 1  ? 'Hace menos de 1h'
+                     : diffH < 24 ? `Hace ${diffH}h`
+                     : `Hace ${Math.round(diffH / 24)} días`;
+        const actDot = !last ? '#94a3b8' : diffH < 24 ? '#22c55e' : diffH < 168 ? '#f59e0b' : '#ef4444';
+        const accent = ACCENT[i % ACCENT.length];
+        const initials = (t.nombre || t.subdominio).split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
+        const hasChart = activo && !t.error && (t.porEstado||[]).length > 0;
+        const badgeStyle = activo
+          ? 'background:#22c55e18;color:#22c55e;border:1px solid #22c55e30'
+          : 'background:#ef444418;color:#ef4444;border:1px solid #ef444430';
+
+        const statBox = (val, lbl, color) =>
+          `<div style="border:1px solid var(--border);border-radius:8px;padding:10px 6px;text-align:center;flex:1">
+             <span style="display:block;font-size:18px;font-weight:800;line-height:1;color:${color||'var(--text)'}">${val}</span>
+             <span style="display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-top:4px">${lbl}</span>
+           </div>`;
+
+        return `
+        <div class="card" style="padding:16px;border-top:3px solid ${accent};${!activo ? 'opacity:.65' : ''}">
+
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:14px">
+            <div style="width:38px;height:38px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;background:linear-gradient(135deg,${accent},${accent}77)">${initials}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:700;line-height:1.3;color:var(--text)">${t.nombre}</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px">@${t.subdominio}</div>
+            </div>
+            <span style="flex-shrink:0;font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.04em;text-transform:uppercase;${badgeStyle}">${activo ? '● Activo' : '● Suspendido'}</span>
+          </div>
+
+          ${t.error ? `<div style="background:#ef444412;border:1px solid #ef444428;border-radius:8px;padding:7px 10px;font-size:11px;color:#ef4444;margin-bottom:12px">⚠ Base de datos no disponible</div>` : ''}
+
+          <div style="display:flex;gap:8px;margin-bottom:14px">
+            ${statBox((t.reportesHoy||0).toLocaleString(), 'Hoy', accent)}
+            ${statBox((t.reportesMes||0).toLocaleString(), 'Este mes', '')}
+            ${statBox((t.totalReportes||0).toLocaleString(), 'Total', '')}
+          </div>
+
+          ${hasChart ? `
+          <div style="margin-bottom:14px">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:8px">Estado de reportes</div>
+            <div style="position:relative;height:120px"><canvas id="sa-te-${t.subdominio}"></canvas></div>
+          </div>` : ''}
+
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-muted);padding-top:12px;border-top:1px solid var(--border)">
+            <span><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${actDot};margin-right:5px;vertical-align:middle"></span>${actLbl}</span>
+            <span>👤 ${(t.usuarios||0).toLocaleString()} usuarios</span>
+          </div>
+
+        </div>`;
+      }).join('');
+
+      // ── Doughnut por municipio ──
+      if (!ChartJS) return;
+      sorted.forEach(t => {
+        if (t.estado !== 'activo' || t.error || !(t.porEstado||[]).length) return;
+        const canvasId = `sa-te-${t.subdominio}`;
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        if (window._saCharts[canvasId]) window._saCharts[canvasId].destroy();
+        const estados = t.porEstado;
+        window._saCharts[canvasId] = new ChartJS(canvas, {
+          type: 'doughnut',
+          data: {
+            labels: estados.map(e => eLabels[e.estado] || e.estado),
+            datasets: [{
+              data: estados.map(e => e.total),
+              backgroundColor: estados.map(e => eColors[e.estado] || '#a78bfa'),
+              borderWidth: 0, hoverOffset: 4,
+            }]
+          },
+          options: {
+            animation: false,
+            responsive: true, maintainAspectRatio: false, cutout: '65%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { color: textColor, font: { size: 10, family: 'Inter,sans-serif' }, padding: 10, boxWidth: 10 }
+              },
+              tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString()}` } }
+            }
+          }
+        });
+      });
+    };
+
+    // Interceptar window.applyFilters cuando el bundle lo asigne.
+    // Así al usar el filtro Desde/Hasta en cualquier vista, las KPI cards también se actualizan.
+    let _origApplyFilters;
+    Object.defineProperty(window, 'applyFilters', {
+      configurable: true,
+      get() { return _origApplyFilters; },
+      set(fn) {
+        _origApplyFilters = function(...args) {
+          // Sincronizar _sgtiDateFilter con los inputs del formulario
+          const fromEl = document.getElementById('filter-from');
+          const toEl   = document.getElementById('filter-to');
+          if (fromEl?.value && toEl?.value) {
+            window._sgtiDateFilter = { from: fromEl.value, to: toEl.value };
+          }
+          const result = fn.apply(this, args);
+          // Recargar KPIs de la vista activa después de que refreshReportes termine
+          setTimeout(() => {
+            const activeEl = document.querySelector('.view.active');
+            const viewId   = activeEl?.id?.replace('view-', '');
+            if (viewId && ['seguridad', 'fiscalizacion_transporte'].includes(viewId)) {
+              window.showView?.(viewId);
+            }
+          }, 350);
+          return result;
+        };
+      }
+    });
+  })();
+  </script>
+
+  <script>
+  // ── Eliminar municipio desde superadmin ──────────────────────────────────────
+  function _ensureModalEliminar() {
+    if (document.getElementById('modal-eliminar-tenant')) return;
+    const el = document.createElement('div');
+    el.innerHTML = `
+      <div id="modal-eliminar-tenant" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.7);z-index:10001;align-items:center;justify-content:center;backdrop-filter:blur(3px)">
+        <div style="background:#fff;border-radius:16px;padding:28px 24px;width:90%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,0.4);border:1px solid #fecaca;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <div style="width:42px;height:42px;border-radius:12px;background:#fee2e2;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;font-weight:800;color:#dc2626">X</div>
+            <div>
+              <div style="font-size:15px;font-weight:800;color:#dc2626">Eliminar municipio</div>
+              <div style="font-size:12px;color:#64748b;margin-top:2px">Esta acción no se puede deshacer</div>
+            </div>
+          </div>
+          <p id="modal-eliminar-msg" style="font-size:13px;color:#334155;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;margin-bottom:20px;line-height:1.5"></p>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button onclick="document.getElementById('modal-eliminar-tenant').style.display='none'"
+              style="padding:9px 18px;border-radius:8px;border:1px solid #cbd5e1;background:#f1f5f9;color:#475569;font-weight:600;cursor:pointer;font-size:13px">
+              Cancelar
+            </button>
+            <button id="modal-eliminar-confirm-btn"
+              style="padding:9px 18px;border-radius:8px;border:none;background:#dc2626;color:#fff;font-weight:700;cursor:pointer;font-size:13px">
+              Sí, eliminar todo
+            </button>
+          </div>
+          <p id="modal-eliminar-status" style="margin:10px 0 0;font-size:12px;text-align:center;min-height:16px;color:#64748b"></p>
+        </div>
+      </div>`;
+    document.body.appendChild(el.firstElementChild);
+  }
+
+  window.eliminarTenant = function(tenantId, tenantNombre) {
+    _ensureModalEliminar();
+    const modal  = document.getElementById('modal-eliminar-tenant');
+    const msg    = document.getElementById('modal-eliminar-msg');
+    const status = document.getElementById('modal-eliminar-status');
+    const btn    = document.getElementById('modal-eliminar-confirm-btn');
+    if (msg) msg.textContent = `¿Eliminar "${tenantNombre}" con todos sus usuarios, reportes y datos? Se borrarán también los archivos del servidor.`;
+    if (status) status.textContent = '';
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Sí, eliminar todo';
+      btn.onclick = async () => {
+        btn.disabled = true;
+        btn.textContent = 'Eliminando...';
+        if (status) status.textContent = '';
+        try {
+          const token = localStorage.getItem('sgti_token') || '';
+          const resp = await fetch(`/api/superadmin/tenants/${tenantId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await resp.json();
+          if (!resp.ok) {
+            if (status) { status.style.color = '#dc2626'; status.textContent = data.error || 'Error al eliminar.'; }
+            btn.disabled = false; btn.textContent = 'Sí, eliminar todo';
+            return;
+          }
+          if (status) { status.style.color = '#16a34a'; status.textContent = '✓ ' + data.mensaje; }
+          setTimeout(() => {
+            modal.style.display = 'none';
+            window.renderTenantsList?.();
+            window._loadSaAnalytics?.();
+          }, 1200);
+        } catch(e) {
+          if (status) { status.style.color = '#dc2626'; status.textContent = 'Error de conexión.'; }
+          btn.disabled = false; btn.textContent = 'Sí, eliminar todo';
+        }
+      };
+    }
+    modal.style.display = 'flex';
+  };
+
+  // MutationObserver: reorganiza acciones de cada fila de tenants e inyecta Eliminar
+  (function() {
+    const BTN = 'padding:6px 10px;font-size:11px;font-weight:600;border-radius:7px;cursor:pointer;border:none;display:flex;align-items:center;gap:5px;justify-content:center;width:100%;white-space:nowrap';
+
+    function estilizarAcciones(container) {
+      if (container.dataset.sgtiStyled) return;
+      container.dataset.sgtiStyled = '1';
+
+      // Recoger botones existentes del bundle
+      const btns = [...container.querySelectorAll('button')];
+      const editBtn   = btns.find(b => b.textContent.trim() === 'Editar');
+      const statusBtn = btns.find(b => ['Suspender','Activar'].includes(b.textContent.trim()));
+      const entrarBtn = btns.find(b => b.textContent.trim() === 'Entrar');
+      const usersBtn  = btns.find(b => b.textContent.trim() === 'Usuarios');
+      if (!editBtn) return;
+
+      // Obtener id y nombre del tenant desde editarTenant
+      const m = editBtn.getAttribute('onclick')?.match(/editarTenant\('([^']+)',\s*'([^']*)'/);
+      if (!m) return;
+      const [, tenantId, tenantNombre] = m;
+
+      // Limpiar el contenedor
+      container.innerHTML = '';
+      container.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:5px;min-width:200px';
+
+      // Botón Editar
+      const bEdit = document.createElement('button');
+      bEdit.textContent = 'Editar';
+      bEdit.style.cssText = BTN + ';background:#e0f2fe;color:#0369a1';
+      bEdit.onclick = editBtn.onclick;
+      bEdit.setAttribute('onclick', editBtn.getAttribute('onclick'));
+
+      // Botón Suspender/Activar
+      const isSuspended = statusBtn?.textContent.trim() === 'Activar';
+      const bStatus = document.createElement('button');
+      bStatus.textContent = isSuspended ? 'Activar' : 'Suspender';
+      bStatus.style.cssText = BTN + ';background:' + (isSuspended ? '#dcfce7;color:#15803d' : '#fee2e2;color:#b91c1c');
+      bStatus.setAttribute('onclick', statusBtn?.getAttribute('onclick') || '');
+
+      // Botón Entrar (solo si existe)
+      const bEntrar = document.createElement('button');
+      if (entrarBtn) {
+        bEntrar.textContent = 'Entrar';
+        bEntrar.style.cssText = BTN + ';background:#ede9fe;color:#6d28d9';
+        bEntrar.setAttribute('onclick', entrarBtn.getAttribute('onclick'));
+      }
+
+      // Botón Usuarios
+      const bUsers = document.createElement('button');
+      bUsers.textContent = 'Usuarios';
+      bUsers.style.cssText = BTN + ';background:#f0fdf4;color:#166534';
+      bUsers.setAttribute('onclick', usersBtn?.getAttribute('onclick') || '');
+
+      // Botón Eliminar (ancho completo)
+      const bDel = document.createElement('button');
+      bDel.textContent = 'Eliminar';
+      bDel.style.cssText = BTN + ';background:#fff1f2;color:#be123c;border:1px solid #fecdd3;grid-column:1/-1';
+      bDel.onclick = () => window.eliminarTenant(tenantId, tenantNombre);
+
+      container.appendChild(bEdit);
+      container.appendChild(bStatus);
+      if (entrarBtn) {
+        container.appendChild(bEntrar);
+        container.appendChild(bUsers);
+      } else {
+        bUsers.style.cssText = BTN + ';background:#f0fdf4;color:#166534;grid-column:1/-1';
+        container.appendChild(bUsers);
+      }
+      container.appendChild(bDel);
+    }
+
+    const obs = new MutationObserver(() => {
+      const view = document.getElementById('view-superadmin');
+      if (!view) return;
+      view.querySelectorAll('button[onclick*="editarTenant"]').forEach(editBtn => {
+        const container = editBtn.closest('div[style*="flex"]') || editBtn.parentElement;
+        if (container) estilizarAcciones(container);
+      });
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+  })();
+
+  function _ensureModalesUsuarios() {
+    if (document.getElementById('modal-usuarios')) return;
+    const html = `
+      <div id="modal-usuarios" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:var(--bg-card,#1e2535);border-radius:12px;padding:24px;width:90%;max-width:560px;max-height:80vh;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3 id="modal-usuarios-title" style="margin:0;font-size:15px;color:var(--text-primary,#fff);">Usuarios del municipio</h3>
+            <button onclick="document.getElementById('modal-usuarios').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted,#aaa);">✕</button>
+          </div>
+          <div id="modal-usuarios-list" style="overflow-y:auto;flex:1;color:var(--text-primary,#fff);"></div>
+        </div>
+      </div>
+      <div id="modal-credenciales" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;">
+        <div style="background:var(--bg-card,#1e2535);border-radius:12px;padding:24px;width:90%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h3 style="margin:0;font-size:15px;color:var(--text-primary,#fff);">Editar credenciales</h3>
+            <button onclick="document.getElementById('modal-credenciales').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted,#aaa);">✕</button>
+          </div>
+          <input type="hidden" id="cred-tenant-id">
+          <input type="hidden" id="cred-user-id">
+          <div style="margin-bottom:12px;">
+            <label style="display:block;font-size:11px;font-weight:700;margin-bottom:4px;color:var(--text-muted,#aaa);">NUEVO USUARIO</label>
+            <input type="text" id="cred-username" placeholder="Dejar vacío para no cambiar" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border-light,#333);background:var(--bg-input,#252d3d);color:var(--text-primary,#fff);box-sizing:border-box;">
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:11px;font-weight:700;margin-bottom:4px;color:var(--text-muted,#aaa);">NUEVA CONTRASEÑA</label>
+            <input type="password" id="cred-password" placeholder="Dejar vacío para no cambiar" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border-light,#333);background:var(--bg-input,#252d3d);color:var(--text-primary,#fff);box-sizing:border-box;">
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button onclick="document.getElementById('modal-credenciales').style.display='none'" style="padding:8px 16px;border-radius:6px;border:1px solid var(--border-light,#333);background:none;cursor:pointer;color:var(--text-primary,#fff);">Cancelar</button>
+            <button onclick="window.guardarCredenciales()" style="padding:8px 16px;border-radius:6px;border:none;background:#1a6b3a;color:#fff;font-weight:700;cursor:pointer;">Guardar</button>
+          </div>
+          <p id="cred-msg" style="margin:8px 0 0;font-size:12px;text-align:center;min-height:16px;"></p>
+        </div>
+      </div>`;
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+    document.body.appendChild(wrapper.firstElementChild);
+    document.body.appendChild(wrapper.firstElementChild);
+  }
+
+  window.verUsuariosTenant = async function(tenantId, tenantNombre) {
+    _ensureModalesUsuarios();
+    const token = localStorage.getItem('sgti_token');
+    document.getElementById('modal-usuarios-title').textContent = 'Usuarios — ' + tenantNombre;
+    document.getElementById('modal-usuarios-list').innerHTML = '<p style="text-align:center;color:var(--text-muted,#aaa);">Cargando...</p>';
+    document.getElementById('modal-usuarios').style.display = 'flex';
+    try {
+      const res = await fetch('/api/superadmin/tenants/' + tenantId + '/usuarios', { headers: { Authorization: 'Bearer ' + token } });
+      const usuarios = await res.json();
+      if (!usuarios.length) {
+        document.getElementById('modal-usuarios-list').innerHTML = '<p style="color:var(--text-muted);text-align:center;">Sin usuarios registrados.</p>';
+        return;
+      }
+      document.getElementById('modal-usuarios-list').innerHTML = `
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr style="border-bottom:1px solid var(--border-light);">
+            <th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-size:11px;">USUARIO</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-size:11px;">ROL</th>
+            <th style="text-align:left;padding:6px 8px;color:var(--text-muted);font-size:11px;">ESTADO</th>
+            <th style="padding:6px 8px;"></th>
+          </tr></thead>
+          <tbody>
+            ${usuarios.map(u => `
+              <tr style="border-bottom:1px solid var(--border-light);">
+                <td style="padding:8px;">${u.username}</td>
+                <td style="padding:8px;"><span style="font-size:10px;background:var(--blue,#3b82f6);color:#fff;padding:2px 6px;border-radius:4px;">${u.rol}</span></td>
+                <td style="padding:8px;"><span style="font-size:10px;color:${u.habilitado?'#22c55e':'#ef4444'}">${u.habilitado?'Activo':'Deshabilitado'}</span></td>
+                <td style="padding:8px;">
+                  <button onclick="window.abrirEditarCredenciales('${tenantId}', ${u.id}, '${u.username}')"
+                    style="padding:4px 10px;font-size:11px;font-weight:700;border-radius:5px;border:none;background:#1a6b3a;color:#fff;cursor:pointer;">
+                    Editar
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>`;
+    } catch(e) {
+      document.getElementById('modal-usuarios-list').innerHTML = '<p style="color:#ef4444;">Error cargando usuarios.</p>';
+    }
+  };
+
+  window.abrirEditarCredenciales = function(tenantId, userId, username) {
+    _ensureModalesUsuarios();
+    document.getElementById('cred-tenant-id').value = tenantId;
+    document.getElementById('cred-user-id').value = userId;
+    document.getElementById('cred-username').value = '';
+    document.getElementById('cred-username').placeholder = 'Actual: ' + username;
+    document.getElementById('cred-password').value = '';
+    document.getElementById('cred-msg').textContent = '';
+    document.getElementById('modal-credenciales').style.display = 'flex';
+  };
+
+  // ── PDF Mejorado: gráficos, comparativa, firma ───────────────────────────────
+  (function() {
+    let _origGenerarPDF;
+    let _pdfEnhData = null;
+
+    // Polyfill roundRect por si el browser no lo tiene
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        if (w < 2*r) r = w/2; if (h < 2*r) r = h/2;
+        this.beginPath();
+        this.moveTo(x+r, y);
+        this.arcTo(x+w, y, x+w, y+h, r);
+        this.arcTo(x+w, y+h, x, y+h, r);
+        this.arcTo(x, y+h, x, y, r);
+        this.arcTo(x, y, x+w, y, r);
+        this.closePath();
+        return this;
+      };
+    }
+
+    // ── Canvas: gráfico de barras horizontales ─────────────────────────────
+    function _barChart(items, cW, cH) {
+      const canvas = document.createElement('canvas');
+      canvas.width = cW; canvas.height = cH;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, cW, cH);
+
+      const top = items.slice(0, 10);
+      const maxV = Math.max(...top.map(i => i.value), 1);
+      const labelW = 130, padR = 55, barH = Math.min(22, (cH - 30) / top.length - 5);
+
+      top.forEach((item, i) => {
+        const y = 15 + i * (barH + 6);
+        const bW = ((item.value / maxV) * (cW - labelW - padR));
+
+        ctx.fillStyle = '#334155';
+        ctx.font = '11px Arial';
+        ctx.textAlign = 'right';
+        const lbl = item.label.length > 17 ? item.label.slice(0, 16) + '…' : item.label;
+        ctx.fillText(lbl, labelW - 6, y + barH * 0.7);
+
+        ctx.fillStyle = '#f1f5f9';
+        ctx.roundRect(labelW, y, cW - labelW - padR, barH, 3);
+        ctx.fill();
+
+        ctx.fillStyle = item.color || '#4F8FF7';
+        ctx.roundRect(labelW, y, Math.max(bW, 4), barH, 3);
+        ctx.fill();
+
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 11px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(item.value, labelW + bW + 5, y + barH * 0.7);
+      });
+      return canvas.toDataURL('image/png');
+    }
+
+    // ── Canvas: gráfico de línea de tendencia ──────────────────────────────
+    function _lineChart(points, cW, cH) {
+      const canvas = document.createElement('canvas');
+      canvas.width = cW; canvas.height = cH;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, cW, cH);
+      if (!points.length) return canvas.toDataURL('image/png');
+
+      const padL=50, padR=20, padT=18, padB=28;
+      const chartW = cW-padL-padR, chartH = cH-padT-padB;
+      const maxV = Math.max(...points.map(p=>p.count), 1);
+
+      // Grid
+      ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+      [0,1,2,3,4].forEach(g => {
+        const y = padT + (chartH/4)*g;
+        ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(padL+chartW,y); ctx.stroke();
+        ctx.fillStyle='#94a3b8'; ctx.font='9px Arial'; ctx.textAlign='right';
+        ctx.fillText(Math.round(maxV*(1-g/4)), padL-5, y+3);
+      });
+
+      // X labels
+      const skip = Math.ceil(points.length/8);
+      points.forEach((p,i) => {
+        if (i%skip===0) {
+          const x = padL + (i/Math.max(points.length-1,1))*chartW;
+          ctx.fillStyle='#94a3b8'; ctx.font='8px Arial'; ctx.textAlign='center';
+          ctx.fillText(p.date.slice(5), x, padT+chartH+16);
+        }
+      });
+
+      const px = (i) => padL + (i/Math.max(points.length-1,1))*chartW;
+      const py = (v) => padT + chartH - (v/maxV)*chartH;
+
+      // Area
+      ctx.beginPath();
+      ctx.moveTo(padL, padT+chartH);
+      points.forEach((p,i) => ctx.lineTo(px(i), py(p.count)));
+      ctx.lineTo(padL+chartW, padT+chartH);
+      ctx.closePath();
+      ctx.fillStyle='rgba(79,143,247,0.13)'; ctx.fill();
+
+      // Line
+      ctx.beginPath(); ctx.strokeStyle='#4F8FF7'; ctx.lineWidth=2.5; ctx.lineJoin='round';
+      points.forEach((p,i) => i===0 ? ctx.moveTo(px(i),py(p.count)) : ctx.lineTo(px(i),py(p.count)));
+      ctx.stroke();
+
+      // Dots en picos
+      points.forEach((p,i) => {
+        if (p.count === maxV || i===0 || i===points.length-1) {
+          ctx.beginPath(); ctx.arc(px(i),py(p.count),4,0,Math.PI*2);
+          ctx.fillStyle='#4F8FF7'; ctx.fill();
+          ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+        }
+      });
+      return canvas.toDataURL('image/png');
+    }
+
+    // ── Fetch datos para mejoras del PDF ───────────────────────────────────
+    async function _fetchEnhData(tipo) {
+      const token  = localStorage.getItem('sgti_token') || '';
+      const tenant = localStorage.getItem('sgti_tenant') || '';
+      const sector = document.getElementById('filter-sector')?.value || 'all';
+      const area   = document.getElementById('filter-area')?.value   || 'all';
+      const from   = document.getElementById('filter-from')?.value   || '';
+      const to     = document.getElementById('filter-to')?.value     || '';
+
+      const mkParams = (f, t) => {
+        const p = new URLSearchParams({ limit: 5000 });
+        if (f) p.append('from', f);
+        if (t) p.append('to', t);
+        if (sector !== 'all') p.append('sector', sector);
+        const grp = (area !== 'all') ? area : (tipo !== 'general' && tipo !== 'ejecutivo' ? tipo : '');
+        if (grp) p.append('grupo', grp);
+        if (tenant) p.append('tenant', tenant);
+        return p;
+      };
+
+      let prevFrom='', prevTo='';
+      if (from && to) {
+        const d1=new Date(from), d2=new Date(to);
+        const days = Math.round((d2-d1)/86400000);
+        const pTo = new Date(d1); pTo.setDate(pTo.getDate()-1);
+        const pFrom = new Date(pTo); pFrom.setDate(pFrom.getDate()-days);
+        prevFrom = pFrom.toISOString().slice(0,10);
+        prevTo   = pTo.toISOString().slice(0,10);
+      }
+
+      const hdrs = { Authorization: `Bearer ${token}` };
+      let curr=[], prev=[];
+      try {
+        const r = await fetch(`/api/whatsapp/reportes?${mkParams(from,to)}`, {headers:hdrs});
+        const d = await r.json();
+        curr = d.reportes || (Array.isArray(d) ? d : []);
+      } catch(e) {}
+      if (prevFrom && prevTo) {
+        try {
+          const r = await fetch(`/api/whatsapp/reportes?${mkParams(prevFrom,prevTo)}`, {headers:hdrs});
+          const d = await r.json();
+          prev = d.reportes || (Array.isArray(d) ? d : []);
+        } catch(e) {}
+      }
+
+      // Procesar sectores
+      const sCounts = {};
+      curr.forEach(r => {
+        if (r.sector && r.sector !== 'Fuera de Jurisdicción' && r.sector !== 'Sin sector')
+          sCounts[r.sector] = (sCounts[r.sector]||0)+1;
+      });
+      const sectorItems = Object.entries(sCounts)
+        .sort((a,b)=>b[1]-a[1]).slice(0,10)
+        .map(([label,value],i)=>({label,value,color:i===0?'#ef4444':i===1?'#f59e0b':i===2?'#f97316':'#4F8FF7'}));
+
+      // Tendencia diaria
+      const daily = {};
+      curr.forEach(r => { if(r.fecha){const d=r.fecha.slice(0,10); daily[d]=(daily[d]||0)+1;} });
+      const trendPoints = Object.entries(daily).sort((a,b)=>a[0].localeCompare(b[0])).map(([date,count])=>({date,count}));
+
+      // Estado
+      const estadoItems = [
+        {label:'Atendidas', value:curr.filter(r=>r.estado==='atendido').length,   color:'#22c55e'},
+        {label:'En Proceso',value:curr.filter(r=>r.estado==='en_proceso').length, color:'#f59e0b'},
+        {label:'Pendientes',value:curr.filter(r=>r.estado==='nuevo').length,      color:'#ef4444'},
+      ].filter(i=>i.value>0);
+
+      const calcStats = d => ({
+        total:     d.length,
+        atendido:  d.filter(r=>r.estado==='atendido').length,
+        nuevo:     d.filter(r=>r.estado==='nuevo').length,
+        alta:      d.filter(r=>['Alta','alta'].includes(r.prioridad)).length,
+        conGeo:    d.filter(r=>r.lat&&r.lng).length,
+      });
+
+      return { curr, prev, sectorItems, trendPoints, estadoItems,
+               currStats:calcStats(curr), prevStats:prev.length?calcStats(prev):null,
+               from, to, prevFrom, prevTo, tipo };
+    }
+
+    // ── Agregar páginas de mejora al doc jsPDF ─────────────────────────────
+    function _addPages(doc) {
+      const enh = _pdfEnhData;
+      if (!enh) return;
+
+      const pw = doc.internal.pageSize.getWidth();
+      const ph = doc.internal.pageSize.getHeight();
+      const BLUE = [79,143,247], DARK=[8,13,26];
+
+      const header = (title, sub) => {
+        doc.setFillColor(...DARK); doc.rect(0,0,pw,24,'F');
+        doc.setTextColor(255,255,255); doc.setFontSize(11); doc.setFont(undefined,'bold');
+        doc.text(title, 14, 10);
+        doc.setFontSize(8); doc.setFont(undefined,'normal'); doc.setTextColor(...BLUE);
+        doc.text(sub, 14, 17);
+        doc.setTextColor(40,40,40);
+        return 30;
+      };
+      const footer = () => {
+        const n = doc.internal.getNumberOfPages();
+        doc.setFontSize(7); doc.setTextColor(150,150,150);
+        doc.text('SGTI Municipal — Sistema de Gestión Territorial de Incidencias', 14, ph-6);
+        doc.text(`Pág. ${n}`, pw-14, ph-6, {align:'right'});
+      };
+
+      // ── Página: Gráfico de barras sectores ──
+      if (enh.sectorItems.length > 0) {
+        doc.addPage();
+        let y = header('ANÁLISIS VISUAL — DISTRIBUCIÓN POR SECTORES',
+                        'Incidencias por sector territorial (excluyendo Fuera de Jurisdicción)');
+
+        const bImg = _barChart(enh.sectorItems, 620, 300);
+        const bW = pw-28, bH = bW*(300/620);
+        doc.addImage(bImg,'PNG',14,y,bW,bH);
+        y += bH + 8;
+
+        if (enh.estadoItems.length > 0) {
+          doc.setFontSize(10); doc.setFont(undefined,'bold'); doc.setTextColor(40,40,40);
+          doc.text('Estado de Atención', 14, y); y += 5;
+          const total = enh.estadoItems.reduce((s,i)=>s+i.value,0);
+          const eImg = _barChart(enh.estadoItems.map(i=>({...i,label:`${i.label} — ${((i.value/total)*100).toFixed(0)}%`})), 620, 90);
+          const eH = bW*(90/620);
+          doc.addImage(eImg,'PNG',14,y,bW,eH);
+        }
+        footer();
+      }
+
+      // ── Página: Tendencia diaria ──
+      if (enh.trendPoints.length > 3) {
+        doc.addPage();
+        let y = header('ANÁLISIS TEMPORAL — TENDENCIA DIARIA DE INCIDENCIAS',
+                        'Evolución de reportes por día calendario en el período seleccionado');
+
+        const tImg = _lineChart(enh.trendPoints, 620, 210);
+        const tW = pw-28, tH = tW*(210/620);
+        doc.addImage(tImg,'PNG',14,y,tW,tH);
+        y += tH + 10;
+
+        const pts = enh.trendPoints;
+        const avg = (pts.reduce((s,p)=>s+p.count,0)/pts.length).toFixed(1);
+        const maxDay = pts.reduce((m,p)=>p.count>m.count?p:m, pts[0]);
+        const minDay = pts.reduce((m,p)=>p.count<m.count?p:m, pts[0]);
+
+        doc.setFontSize(9.5); doc.setFont(undefined,'normal'); doc.setTextColor(70,70,70);
+        [
+          `• Promedio diario: ${avg} incidencias/día durante ${pts.length} días`,
+          `• Día de mayor actividad: ${maxDay.date} con ${maxDay.count} reportes registrados`,
+          `• Día de menor actividad: ${minDay.date} con ${minDay.count} reportes registrados`,
+        ].forEach(txt => { doc.text(txt, 14, y); y += 6; });
+        footer();
+      }
+
+      // ── Página: Comparativa períodos ──
+      if (enh.prevStats && enh.prev.length > 0) {
+        doc.addPage();
+        let y = header('COMPARATIVA DE PERÍODOS — ACTUAL VS ANTERIOR',
+                        `Actual: ${enh.from||'inicio'} – ${enh.to||'hoy'}  |  Anterior: ${enh.prevFrom} – ${enh.prevTo}`);
+
+        const c=enh.currStats, p=enh.prevStats;
+        const pct=(curr,prev)=>prev===0?'N/D':`${curr>prev?'+':''}${(((curr-prev)/prev)*100).toFixed(1)}%`;
+        const arrow=(curr,prev,lowGood)=>{
+          if(prev===0)return'—';
+          const up=curr>prev;
+          return (up&&!lowGood)||(!up&&lowGood)?'▼ Mejora':'▲ Aumento';
+        };
+        const tasa=(d)=>d.total?((d.atendido/d.total)*100).toFixed(1)+'%':'0%';
+
+        doc.autoTable({
+          startY:y,
+          head:[['Indicador','Período Anterior','Período Actual','Variación','Tendencia']],
+          body:[
+            ['Total Incidencias',    p.total,    c.total,    pct(c.total,p.total),       arrow(c.total,p.total,true)],
+            ['Atendidas',           p.atendido, c.atendido, pct(c.atendido,p.atendido),  arrow(c.atendido,p.atendido,false)],
+            ['Pendientes',          p.nuevo,    c.nuevo,    pct(c.nuevo,p.nuevo),         arrow(c.nuevo,p.nuevo,true)],
+            ['Prioridad Alta',      p.alta,     c.alta,     pct(c.alta,p.alta),           arrow(c.alta,p.alta,true)],
+            ['Georeferenciadas',    p.conGeo,   c.conGeo,   pct(c.conGeo,p.conGeo),       arrow(c.conGeo,p.conGeo,false)],
+            ['Tasa Resolución',     tasa(p),    tasa(c),    '—','—'],
+          ],
+          styles:{fontSize:9.5,cellPadding:4,valign:'middle'},
+          headStyles:{fillColor:DARK,textColor:[255,255,255],fontStyle:'bold',fontSize:9},
+          columnStyles:{
+            0:{cellWidth:52,fontStyle:'bold'},
+            1:{cellWidth:35,halign:'center'},
+            2:{cellWidth:35,halign:'center',fontStyle:'bold',textColor:BLUE},
+            3:{cellWidth:30,halign:'center'},
+            4:{cellWidth:'auto',halign:'center',fontStyle:'bold'},
+          },
+          didParseCell(data){
+            if(data.column.index===3&&data.cell.section==='body'){
+              const v=String(data.cell.raw);
+              if(v.startsWith('+'))data.cell.styles.textColor=[220,38,38];
+              else if(v.startsWith('-'))data.cell.styles.textColor=[22,163,74];
+            }
+            if(data.column.index===4&&data.cell.section==='body'){
+              const v=String(data.cell.raw);
+              if(v.includes('Mejora'))data.cell.styles.textColor=[22,163,74];
+              else if(v.includes('Aumento'))data.cell.styles.textColor=[220,38,38];
+            }
+          },
+          margin:{left:14,right:14},
+        });
+        y = doc.lastAutoTable.finalY+10;
+        doc.setFontSize(7.5); doc.setFont(undefined,'italic'); doc.setTextColor(110,110,110);
+        doc.text('* "Mejora" en incidencias totales/pendientes/alta indica reducción (positivo). "Aumento" indica incremento (requiere atención).', 14, y);
+        footer();
+      }
+
+      // ── Página: Firma y autorización ──
+      doc.addPage();
+      let y = header('CERTIFICACIÓN Y AUTORIZACIÓN DEL INFORME',
+                      'Documento oficial generado por el Sistema de Gestión Territorial de Incidencias (SGTI Municipal)');
+
+      const fechaStr = new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'});
+      doc.setFontSize(9.5); doc.setFont(undefined,'normal'); doc.setTextColor(60,60,60);
+      doc.text(`El presente informe fue generado automáticamente el día ${fechaStr}, conforme a los datos registrados en el`, 14, y, {maxWidth:pw-28});
+      y += 6;
+      doc.text('sistema SGTI Municipal y validados por la unidad responsable de la municipalidad.', 14, y, {maxWidth:pw-28});
+      y += 16;
+
+      // Cajas de firma
+      const boxes=[
+        {title:'ELABORADO POR',   sub:'Analista / Operador del Sistema'},
+        {title:'REVISADO POR',    sub:'Gerente de Área / Responsable'},
+        {title:'APROBADO POR',    sub:'Alcalde / Gerente Municipal'},
+      ];
+      const bxW=(pw-28-10)/3;
+      boxes.forEach((box,i)=>{
+        const x=14+i*(bxW+5);
+        doc.setDrawColor(180,180,180); doc.setLineWidth(0.3);
+        doc.rect(x, y, bxW, 58);
+
+        doc.setFillColor(...BLUE); doc.rect(x, y, bxW, 11,'F');
+        doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont(undefined,'bold');
+        doc.text(box.title, x+bxW/2, y+7.5, {align:'center'});
+
+        doc.setTextColor(100,100,100); doc.setFontSize(7); doc.setFont(undefined,'italic');
+        doc.text(box.sub, x+bxW/2, y+18, {align:'center'});
+
+        doc.setDrawColor(160,160,160); doc.setLineWidth(0.5);
+        doc.line(x+8, y+43, x+bxW-8, y+43);
+
+        doc.setFontSize(7); doc.setTextColor(80,80,80); doc.setFont(undefined,'normal');
+        doc.text('Nombre y Firma', x+bxW/2, y+49, {align:'center'});
+        doc.text('Fecha: _______________', x+bxW/2, y+55, {align:'center'});
+      });
+      y += 68;
+
+      // Número de documento + nota legal
+      const docNum=`SGTI-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(40,40,40);
+      doc.text(`N° Documento: ${docNum}`, 14, y);
+      y += 7;
+      doc.setFont(undefined,'normal'); doc.setFontSize(7.5); doc.setTextColor(130,130,130);
+      const legal='Este documento es de carácter oficial. Su reproducción sin autorización expresa de la Municipalidad queda prohibida. Los datos provienen del Sistema SGTI Municipal y son responsabilidad de las unidades que los registraron.';
+      doc.text(doc.splitTextToSize(legal, pw-28), 14, y);
+
+      // Línea y pie azul
+      doc.setDrawColor(...BLUE); doc.setLineWidth(0.8);
+      doc.line(14, ph-20, pw-14, ph-20);
+      doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(...BLUE);
+      doc.text('SGTI MUNICIPAL — Sistema de Gestión Territorial de Incidencias', pw/2, ph-14, {align:'center'});
+      doc.setFontSize(7); doc.setFont(undefined,'normal'); doc.setTextColor(160,160,160);
+      doc.text('Para verificar la autenticidad, contacte al área de Sistemas de la Municipalidad.', pw/2, ph-9, {align:'center'});
+      footer();
+
+      _pdfEnhData = null;
+    }
+
+    // ── Parche jsPDF.prototype.save ────────────────────────────────────────
+    function _patchJsPDF() {
+      if (!window.jspdf?.jsPDF || window.jspdf.jsPDF._sgtiPDFPatched) return;
+      const orig = window.jspdf.jsPDF.prototype.save;
+      window.jspdf.jsPDF.prototype.save = function(filename, opts) {
+        if (_pdfEnhData && filename && (filename.includes('Reporte_')||filename.includes('Informe_'))) {
+          try { _addPages(this); } catch(e) { console.error('PDF enhancement error:', e); }
+        }
+        return orig.call(this, filename, opts);
+      };
+      window.jspdf.jsPDF._sgtiPDFPatched = true;
+    }
+    if (window.jspdf?.jsPDF) _patchJsPDF();
+    const _jsPDFObs = new MutationObserver(()=>{
+      if(window.jspdf?.jsPDF&&!window.jspdf.jsPDF._sgtiPDFPatched) _patchJsPDF();
+    });
+    _jsPDFObs.observe(document.head,{childList:true,subtree:true});
+
+    // ── Interceptar window.generateReportesPdf ────────────────────────────
+    Object.defineProperty(window, 'generateReportesPdf', {
+      configurable: true,
+      get() { return _enhanced; },
+      set(fn)  { _origGenerarPDF = fn; },
+    });
+
+    async function _enhanced(tipo) {
+      // Overlay de carga
+      let ov = document.getElementById('sgti-pdf-ov');
+      if (!ov) {
+        ov = document.createElement('div');
+        ov.id = 'sgti-pdf-ov';
+        ov.style.cssText='position:fixed;inset:0;background:rgba(8,13,26,.75);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+        ov.innerHTML=`<div style="background:#fff;border-radius:16px;padding:32px 40px;text-align:center;width:300px;box-shadow:0 24px 80px rgba(0,0,0,.4)">
+          <div style="font-size:36px;margin-bottom:12px">📊</div>
+          <div style="font-size:15px;font-weight:700;color:#0f172a;margin-bottom:6px">Generando Informe PDF</div>
+          <div style="font-size:12px;color:#64748b;margin-bottom:16px" id="sgti-pdf-st">Preparando datos...</div>
+          <div style="height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden">
+            <div id="sgti-pdf-br" style="height:100%;background:#4F8FF7;width:8%;border-radius:3px;transition:width .4s ease"></div>
+          </div>
+        </div>`;
+        document.body.appendChild(ov);
+      }
+      ov.style.display = 'flex';
+      const setSt = (msg, pct) => {
+        const el=document.getElementById('sgti-pdf-st'), br=document.getElementById('sgti-pdf-br');
+        if(el) el.textContent=msg;
+        if(br) br.style.width=pct+'%';
+      };
+
+      try {
+        _patchJsPDF();
+        setSt('Obteniendo datos del período actual…', 15);
+        _pdfEnhData = await _fetchEnhData(tipo);
+        setSt('Calculando comparativa con período anterior…', 40);
+        await new Promise(r=>setTimeout(r,200));
+        setSt('Generando informe base del sistema…', 65);
+        if (_origGenerarPDF) await _origGenerarPDF.call(window, tipo);
+        setSt('Añadiendo gráficos y firma…', 90);
+        await new Promise(r=>setTimeout(r,300));
+        setSt('¡Informe completado!', 100);
+      } catch(e) {
+        console.error('PDF enhancer error:', e);
+        _pdfEnhData = null;
+        if (_origGenerarPDF) await _origGenerarPDF.call(window, tipo);
+      } finally {
+        setTimeout(()=>{ ov.style.display='none'; }, 1500);
+      }
+    }
+  })();
+
+  </script>
+
+  <!-- Mapa de calor crítico — aislado en su propio script para no verse afectado por errores de otros bloques -->
+  <script>
+  (function() {
+    let _criticoLayer  = null;   // L.heatLayer con pesos críticos
+    let _marcadores    = [];     // círculos individuales con popup
+    let _modoActivo    = false;  // true cuando está en modo crítico
+
+    const COLORES_PESO = {
+      alto:  '#ef4444',   // peso >= 8
+      medio: '#f59e0b',   // peso >= 5
+      bajo:  '#3b82f6',   // peso < 5
+    };
+
+    function colorPorPeso(p) {
+      return p >= 8 ? COLORES_PESO.alto : p >= 5 ? COLORES_PESO.medio : COLORES_PESO.bajo;
+    }
+
+    // Agrega la opción "Seguridad Crítica" al selector de grupo del heat map
+    function _inyectarOpcionCritico() {
+      const sel = document.getElementById('heat-filtro-grupo');
+      if (!sel || sel.querySelector('option[value="critico"]')) return;
+      const opt = document.createElement('option');
+      opt.value = 'critico';
+      opt.textContent = 'Seguridad Critica (ponderado)';
+      sel.appendChild(opt);
+    }
+
+    // Limpia capas del modo crítico del mapa
+    function _limpiarCapasCritico(map) {
+      if (_criticoLayer && map) { try { map.removeLayer(_criticoLayer); } catch(e) {} _criticoLayer = null; }
+      _marcadores.forEach(m => { try { map.removeLayer(m); } catch(e) {} });
+      _marcadores = [];
+    }
+
+    // Helpers de tiempo
+    function _diasTranscurridos(fecha) {
+      if (!fecha) return 0;
+      return (Date.now() - new Date(fecha).getTime()) / 86400000;
+    }
+    function _labelTiempo(fecha) {
+      if (!fecha) return '';
+      const ms = Date.now() - new Date(fecha).getTime();
+      const d = Math.floor(ms / 86400000);
+      const h = Math.floor((ms % 86400000) / 3600000);
+      if (d >= 1) return `${d}d ${h}h`;
+      if (h >= 1) return `${h}h`;
+      return 'Reciente';
+    }
+    const _ATENDIDOS = new Set(['atendido','atendida','cerrado','cerrada']);
+    function _esPendiente(p) { return !_ATENDIDOS.has((p.estado||'').toLowerCase()); }
+
+    // Renderiza el mapa de calor crítico con pesos y marcadores de novedad
+    async function _renderizarCritico(map) {
+      _limpiarCapasCritico(map);
+      _modoActivo = true;
+
+      const token = localStorage.getItem('sgti_token') || '';
+      const tenant = localStorage.getItem('sgti_tenant') || '';
+      const url = '/api/seguridad/novedades-criticas' + (tenant ? `?tenant=${tenant}` : '');
+
+      let data;
+      try {
+        const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        data = await resp.json();
+      } catch(e) {
+        console.error('Error cargando novedades criticas:', e);
+        return;
+      }
+
+      const points = data.points || [];
+      if (!points.length) {
+        _actualizarPanelNovedades([]);
+        return;
+      }
+
+      // Capa de calor con pesos reales
+      const heatData = points.map(p => [p.lat, p.lng, p.pesoNorm]);
+      if (window.L && window.L.heatLayer) {
+        _criticoLayer = L.heatLayer(heatData, {
+          radius: 28, blur: 20, maxZoom: 17,
+          gradient: { 0.2: '#3b82f6', 0.5: '#f59e0b', 0.8: '#ef4444', 1.0: '#7f1d1d' }
+        });
+        _criticoLayer.addTo(map);
+      }
+
+      // Marcadores individuales con indicador de tiempo transcurrido
+      const topPoints = points.filter(p => p.peso >= 7).slice(0, 100);
+      topPoints.forEach(p => {
+        const color    = colorPorPeso(p.peso);
+        const radius   = p.peso >= 9 ? 9 : p.peso >= 7 ? 7 : 5;
+        const dias     = _diasTranscurridos(p.fecha);
+        const pendiente = _esPendiente(p);
+        const tiempoLabel = _labelTiempo(p.fecha);
+        const fecha    = p.fecha ? new Date(p.fecha).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' }) : '';
+
+        // Borde de alerta según antigüedad pendiente
+        let borderColor = '#fff', borderWeight = 1.5, dashArr = null;
+        if (pendiente && dias >= 7) {
+          borderColor = '#dc2626'; borderWeight = 2.5; dashArr = '5,3';
+        } else if (pendiente && dias >= 3) {
+          borderColor = '#f59e0b'; borderWeight = 2;
+        }
+
+        const tiempoColor = pendiente && dias >= 7 ? '#dc2626' : pendiente && dias >= 3 ? '#d97706' : '#16a34a';
+        const popup = `
+          <div style="min-width:210px;font-family:Inter,sans-serif">
+            <div style="font-weight:700;font-size:13px;color:${color};margin-bottom:4px">${p.categoria}</div>
+            <div style="font-size:12px;color:#334155;line-height:1.4;margin-bottom:6px">${p.novedad || 'Sin descripción'}</div>
+            <div style="display:flex;flex-direction:column;gap:3px;font-size:11px;color:#64748b">
+              <span>Sector: <b>${p.sector}</b></span>
+              ${p.ubicacion ? `<span>Ubicacion: ${p.ubicacion}</span>` : ''}
+              <span>Estado: <b style="color:${p.estado==='atendido'||p.estado==='atendida'?'#16a34a':p.estado==='en_proceso'?'#d97706':'#dc2626'}">${p.estado}</b></span>
+              ${fecha ? `<span>${fecha}</span>` : ''}
+              ${tiempoLabel ? `<span style="margin-top:3px;padding:2px 6px;background:${tiempoColor}22;border-radius:3px;color:${tiempoColor};font-weight:700">⏱ ${tiempoLabel} transcurrido${pendiente?' · Pendiente':''}</span>` : ''}
+            </div>
+          </div>`;
+
+        const opts = { radius: radius + (pendiente && dias >= 7 ? 2 : 0), fillColor: color, color: borderColor, weight: borderWeight, fillOpacity: 0.9 };
+        if (dashArr) opts.dashArray = dashArr;
+        const marker = L.circleMarker([p.lat, p.lng], opts).bindPopup(popup);
+        marker.addTo(map);
+        _marcadores.push(marker);
+      });
+
+      _actualizarPanelNovedades(points);
+    }
+
+    // Actualiza el panel lateral de novedades en el mapa de calor
+    let _tabPanelActivo = 'criticas';
+    function _actualizarPanelNovedades(points) {
+      let panel = document.getElementById('panel-novedades-criticas');
+      if (!panel) {
+        const grid = document.querySelector('.heatmap-grid');
+        if (!grid) return;
+        const col = grid.children[1];
+        if (!col) return;
+        panel = document.createElement('div');
+        panel.id = 'panel-novedades-criticas';
+        panel.className = 'card glass';
+        panel.style.cssText = 'padding:14px;display:none;flex-direction:column;gap:8px;max-height:440px';
+        col.appendChild(panel);
+      }
+
+      if (!_modoActivo) { panel.style.display = 'none'; return; }
+
+      const criticas   = points.filter(p => p.peso >= 7).slice(0, 20);
+      // Más transcurridas: pendientes ordenadas por fecha ASC (más antiguas primero)
+      const transcurridas = points
+        .filter(p => _esPendiente(p) && p.fecha)
+        .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+        .slice(0, 20);
+
+      function _renderItem(p, showTiempo) {
+        const color = colorPorPeso(p.peso);
+        const fecha = p.fecha ? new Date(p.fecha).toLocaleDateString('es-PE') : '';
+        const dias  = _diasTranscurridos(p.fecha);
+        const tLabel = _labelTiempo(p.fecha);
+        const tColor = dias >= 7 ? '#dc2626' : dias >= 3 ? '#d97706' : '#16a34a';
+        return `<div style="border-left:3px solid ${showTiempo ? tColor : color};padding:6px 8px;background:var(--card-hover);border-radius:4px;cursor:pointer"
+                  onclick="(function(){var m=window._sgtiHeatMapInstance||window.mapHeat;m&&m.setView([${p.lat},${p.lng}],17)})()">
+          ${showTiempo
+            ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+                <div style="font-size:11px;font-weight:700;color:${tColor}">⏱ ${tLabel}</div>
+                <div style="font-size:10px;padding:1px 5px;background:${tColor}22;border-radius:3px;color:${tColor};font-weight:700">${p.estado}</div>
+               </div>`
+            : `<div style="font-size:11px;font-weight:700;color:${color}">${p.categoria}</div>`
+          }
+          <div style="font-size:11px;color:var(--text-dim);margin-top:2px;line-height:1.3">${(p.novedad||'').substring(0,70)}${(p.novedad||'').length>70?'…':''}</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:3px">${p.sector} · ${fecha}</div>
+        </div>`;
+      }
+
+      panel.style.display = 'flex';
+      panel.innerHTML = `
+        <div style="display:flex;gap:4px;margin-bottom:4px">
+          <button id="tab-criticas" onclick="window._sgtiTabPanel('criticas')"
+            style="flex:1;padding:5px 0;font-size:11px;font-weight:700;border:none;border-radius:5px;cursor:pointer;
+                   background:${_tabPanelActivo==='criticas'?'#ef4444':'var(--card-hover)'};
+                   color:${_tabPanelActivo==='criticas'?'#fff':'var(--text-muted)'}">
+            Criticas (${criticas.length})
+          </button>
+          <button id="tab-transcurridas" onclick="window._sgtiTabPanel('transcurridas')"
+            style="flex:1;padding:5px 0;font-size:11px;font-weight:700;border:none;border-radius:5px;cursor:pointer;
+                   background:${_tabPanelActivo==='transcurridas'?'#d97706':'var(--card-hover)'};
+                   color:${_tabPanelActivo==='transcurridas'?'#fff':'var(--text-muted)'}">
+            + Tiempo Pendiente (${transcurridas.length})
+          </button>
+        </div>
+        <div id="panel-novedades-lista" style="overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:2px">
+          ${_tabPanelActivo === 'criticas'
+            ? (criticas.length === 0
+                ? '<div style="font-size:11px;color:var(--text-muted);text-align:center;padding:12px">Sin incidencias criticas con coordenadas</div>'
+                : criticas.map(p => _renderItem(p, false)).join(''))
+            : (transcurridas.length === 0
+                ? '<div style="font-size:11px;color:var(--text-muted);text-align:center;padding:12px">Sin novedades pendientes</div>'
+                : transcurridas.map(p => _renderItem(p, true)).join(''))
+          }
+        </div>`;
+
+      // Exponer función de cambio de tab
+      window._sgtiTabPanel = function(tab) {
+        _tabPanelActivo = tab;
+        _actualizarPanelNovedades(points);
+      };
+    }
+
+    function _obtenerMapa() {
+      return window.mapHeat || window._sgtiHeatMapInstance || null;
+    }
+
+    // Enlaza el listener de cambio de filtro al selector (sin tocar actualizarMapaCalor del bundle)
+    function _enlazarSelector() {
+      const sel = document.getElementById('heat-filtro-grupo');
+      if (!sel || sel.dataset.sgtiOk) return;
+      sel.dataset.sgtiOk = '1';
+      _inyectarOpcionCritico();
+
+      sel.addEventListener('change', function() {
+        // Siempre limpiar nuestras capas primero
+        if (_modoActivo) {
+          const map = _obtenerMapa();
+          if (map) _limpiarCapasCritico(map);
+          _modoActivo = false;
+          _actualizarPanelNovedades([]);
+        }
+        if (sel.value !== 'critico') return;
+
+        // Esperar brevemente a que el bundle procese el cambio, luego superponer nuestras capas
+        setTimeout(async function() {
+          const map = _obtenerMapa();
+          if (map) {
+            await _renderizarCritico(map);
+          } else {
+            setTimeout(async function() {
+              const m2 = _obtenerMapa();
+              if (m2) await _renderizarCritico(m2);
+            }, 1000);
+          }
+        }, 300);
+      });
+    }
+
+    // MutationObserver: inyecta la opción e inicializa el listener cuando el selector aparezca
+    const obsHeat = new MutationObserver(function() {
+      _inyectarOpcionCritico();
+      _enlazarSelector();
+    });
+    obsHeat.observe(document.body, { childList: true, subtree: true });
+  })();
+  </script>
+
+  <script>
+  // ── Búsqueda de distrito peruano al crear municipio ──────────────────────────
+  (function() {
+    let _districtBoundaryGeoJSON = null;
+    let _previewMap = null;
+    let _boundaryLayer = null;
+    let _sectorsLayer = null;
+    let _searchTimer = null;
+    let _nominatimResults = [];
+    window._districtSectorsGeoJSON = null;
+
+    // Aplica tema claro directamente con JS sobre el modal (CSS no gana contra inline styles del bundle)
+    window._applyTenantModalTheme = function() {
+      const modal = document.getElementById('tenant-modal');
+      if (!modal) return;
+
+      // Caja del modal
+      const box = modal.querySelector('div');
+      if (box) {
+        Object.assign(box.style, {
+          background:    '#ffffff',
+          border:        '1px solid #bfdbfe',
+          borderRadius:  '16px',
+          boxShadow:     '0 24px 80px rgba(15,23,42,0.45)',
+          maxHeight:     '88vh',
+          overflowY:     'auto',
+        });
+      }
+
+      // Título
+      const title = document.getElementById('tenant-modal-title');
+      if (title) Object.assign(title.style, {
+        color: '#1d4ed8', fontWeight: '800', fontSize: '17px',
+        marginBottom: '16px', paddingBottom: '12px',
+        borderBottom: '2px solid #bfdbfe',
+      });
+
+      // Labels
+      modal.querySelectorAll('label').forEach(el => { el.style.color = '#475569'; });
+
+      // Inputs y selects
+      modal.querySelectorAll('input:not([type=hidden]):not([type=file]), select').forEach(el => {
+        Object.assign(el.style, {
+          background:   '#f0f9ff',
+          border:       '1px solid #bae6fd',
+          color:        '#0f172a',
+          borderRadius: '8px',
+        });
+      });
+
+      // Botones de guardar / cancelar que crea el bundle
+      modal.querySelectorAll('button').forEach(btn => {
+        const txt = btn.textContent.trim().toLowerCase();
+        if (txt.includes('cancel') || txt.includes('cerrar')) {
+          Object.assign(btn.style, { background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1' });
+        }
+      });
+
+      // Textos genéricos (divs con color oscuro heredado del dark-mode)
+      modal.querySelectorAll('p, span:not([style*="color:#"])').forEach(el => {
+        if (!el.style.color) el.style.color = '#334155';
+      });
+    };
+
+    // Interceptar abrirModalNuevoTenant (definido en el bundle) para inyectar el autocomplete
+    let _origCrear;
+    Object.defineProperty(window, 'abrirModalNuevoTenant', {
+      configurable: true,
+      get() { return _origCrear; },
+      set(fn) {
+        _origCrear = function(...a) {
+          window._districtSectorsGeoJSON = null;
+          _districtBoundaryGeoJSON = null;
+          // Ocultar mapa y limpiar si ya estaba abierto antes
+          const mw = document.getElementById('district-map-wrap');
+          if (mw) mw.style.display = 'none';
+          const dd = document.getElementById('district-dropdown');
+          if (dd) dd.style.display = 'none';
+          const eb = document.getElementById('escudo-banner');
+          if (eb) eb.remove();
+          const st = document.getElementById('logo-upload-status');
+          if (st) st.textContent = '';
+          const lf = document.getElementById('logo-file-input');
+          if (lf) lf.value = '';
+          const li = document.getElementById('tenant-logoUrl');
+          if (li) li.value = '';
+          const r = fn.apply(this, a);
+          setTimeout(() => { window._applyTenantModalTheme(); window._enhanceDistrictForm(); }, 80);
+          return r;
+        };
+      }
+    });
+
+    // Interceptar editarTenant para aplicar tema y ocultar panel de mapa
+    let _origEditar;
+    Object.defineProperty(window, 'editarTenant', {
+      configurable: true,
+      get() { return _origEditar; },
+      set(fn) {
+        _origEditar = function(...a) {
+          const r = fn.apply(this, a);
+          setTimeout(() => {
+            window._applyTenantModalTheme();
+            const mw = document.getElementById('district-map-wrap');
+            if (mw) mw.style.display = 'none';
+            const dd = document.getElementById('district-dropdown');
+            if (dd) dd.style.display = 'none';
+          }, 80);
+          return r;
+        };
+      }
+    });
+
+    // Interceptar guardarTenant para auto-setear logoUrl, guardar GeoJSON y nombreProvincia
+    let _origGuardar;
+    Object.defineProperty(window, 'guardarTenant', {
+      configurable: true,
+      get() { return _origGuardar; },
+      set(fn) {
+        _origGuardar = async function(...a) {
+          const tenantId   = document.getElementById('tenant-id')?.value || '';
+          const isCreate   = !tenantId;
+          const subdominio = (document.getElementById('tenant-subdominio')?.value || '').toLowerCase().trim();
+          const nombreProv = document.getElementById('tenant-nombreProvincia')?.value || '';
+          const logoInp    = document.getElementById('tenant-logoUrl');
+          const dist       = document.getElementById('tenant-nombreDistrito')?.value || '';
+
+          // Buscar escudo una sola vez y guardar la URL
+          let escudoUrl = logoInp?.value || '';
+          if (!escudoUrl && dist) {
+            try {
+              const params = new URLSearchParams({ dist, prov: nombreProv });
+              const r = await fetch(`/api/superadmin/escudo-lookup?${params}`);
+              const d = await r.json();
+              if (d.url) escudoUrl = d.url;
+            } catch(e) {}
+          }
+          // Inyectar en el campo para que el original lo incluya en el POST
+          if (logoInp && escudoUrl && !logoInp.value) logoInp.value = escudoUrl;
+
+          const resultado = await fn.apply(this, a);
+          const modal     = document.getElementById('tenant-modal');
+          const exito     = !modal || modal.style.display === 'none';
+
+          if (exito && subdominio) {
+            const tk = localStorage.getItem('sgti_token') || '';
+
+            if (isCreate && window._districtSectorsGeoJSON) {
+              fetch(`/api/superadmin/tenants/${subdominio}/geojson`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tk}` },
+                body: JSON.stringify({ geojson: window._districtSectorsGeoJSON })
+              }).catch(() => {});
+              window._districtSectorsGeoJSON = null;
+            }
+
+            // PUT garantizado: persiste logoUrl + nombreProvincia en BD
+            const putBody = {};
+            if (escudoUrl) putBody.logoUrl = escudoUrl;
+            if (nombreProv) putBody.nombreProvincia = nombreProv;
+
+            if (Object.keys(putBody).length) {
+              fetch(`/api/superadmin/tenants/${subdominio}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tk}` },
+                body: JSON.stringify(putBody)
+              }).then(() => {
+                // Tras el PUT, actualizar la celda logo del row correspondiente
+                if (escudoUrl) {
+                  const rows = document.querySelectorAll('#tenants-table-body tr');
+                  for (const row of rows) {
+                    const code = row.cells[3]?.querySelector('code');
+                    if (code && code.textContent.trim() === subdominio) {
+                      if (!row.cells[1]?.querySelector('img')) {
+                        row.cells[1].innerHTML = `<img src="${escudoUrl}" style="height:30px;width:46px;object-fit:contain;border-radius:4px;">`;
+                      }
+                      break;
+                    }
+                  }
+                }
+              }).catch(() => {});
+            }
+          }
+          return resultado;
+        };
+      }
+    });
+
+    window._enhanceDistrictForm = function() {
+      const inp = document.getElementById('tenant-nombreDistrito');
+      if (!inp || inp.dataset.districtEnhanced) return;
+      inp.dataset.districtEnhanced = '1';
+      inp.setAttribute('autocomplete', 'off');
+      inp.placeholder = 'Escribe el nombre del distrito...';
+
+      // Campo oculto para provincia (si no existe ya)
+      if (!document.getElementById('tenant-nombreProvincia')) {
+        const ph = document.createElement('input');
+        ph.type = 'hidden';
+        ph.id   = 'tenant-nombreProvincia';
+        inp.parentNode.appendChild(ph);
+      }
+
+      // Wrapper para posicionar el dropdown
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:relative;width:100%';
+      inp.parentNode.insertBefore(wrap, inp);
+      wrap.appendChild(inp);
+
+      // Dropdown de sugerencias
+      const dd = document.createElement('div');
+      dd.id = 'district-dropdown';
+      dd.style.cssText = [
+        'position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:99999',
+        'background:#ffffff;border:1px solid #bfdbfe',
+        'border-radius:10px;max-height:220px;overflow-y:auto;display:none',
+        'box-shadow:0 8px 28px rgba(15,23,42,0.15)'
+      ].join(';');
+      wrap.appendChild(dd);
+
+      // Widget de subida de logo (se inyecta justo debajo del campo logoUrl)
+      const logoInpRef = document.getElementById('tenant-logoUrl');
+      if (logoInpRef && !document.getElementById('logo-upload-wrap')) {
+        const uploadWrap = document.createElement('div');
+        uploadWrap.id = 'logo-upload-wrap';
+        uploadWrap.style.cssText = 'margin-top:6px';
+        uploadWrap.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <input type="file" id="logo-file-input" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none">
+            <button type="button" id="logo-upload-btn"
+              style="padding:4px 12px;font-size:11px;font-weight:700;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;border-radius:6px;cursor:pointer">
+              Subir logo propio
+            </button>
+            <span id="logo-upload-status" style="font-size:11px;color:#64748b"></span>
+          </div>
+        `;
+        logoInpRef.parentNode?.insertBefore(uploadWrap, logoInpRef.nextSibling);
+
+        document.getElementById('logo-upload-btn').addEventListener('click', () => {
+          document.getElementById('logo-file-input').click();
+        });
+
+        document.getElementById('logo-file-input').addEventListener('change', async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const statusEl = document.getElementById('logo-upload-status');
+          const btn      = document.getElementById('logo-upload-btn');
+          statusEl.textContent = 'Subiendo...';
+          btn.disabled = true;
+          try {
+            const subdominio = document.getElementById('tenant-subdominio')?.value || '';
+            const fd = new FormData();
+            fd.append('logo', file);
+            const tk = localStorage.getItem('sgti_token') || '';
+            const res = await fetch(`/api/superadmin/upload-logo?subdominio=${encodeURIComponent(subdominio)}`, {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${tk}` },
+              body: fd,
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Error al subir');
+            const logoInp = document.getElementById('tenant-logoUrl');
+            if (logoInp) {
+              logoInp.value = data.url;
+              logoInp.dispatchEvent(new Event('input', { bubbles: true }));
+              logoInp.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            // Quitar banner de escudo si había uno (el usuario eligió su propio logo)
+            const prev = document.getElementById('escudo-banner');
+            if (prev) prev.remove();
+            statusEl.innerHTML = '<span style="color:#16a34a;font-weight:700">✓ Logo subido correctamente</span>';
+            btn.textContent = 'Cambiar logo';
+          } catch(err) {
+            statusEl.innerHTML = `<span style="color:#ef4444">${err.message}</span>`;
+          } finally {
+            btn.disabled = false;
+            e.target.value = '';
+          }
+        });
+      }
+
+      // Panel de mapa (se añade al final del tenant-form)
+      const mapWrap = document.createElement('div');
+      mapWrap.id = 'district-map-wrap';
+      mapWrap.style.cssText = 'display:none;margin-top:14px;';
+      mapWrap.innerHTML = `
+        <!-- Cabecera con tabs de modo -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+          <span style="font-size:11px;font-weight:700;color:var(--text-muted,#aaa);text-transform:uppercase;letter-spacing:.06em">
+            Vista previa · Sectores del distrito
+          </span>
+          <div style="display:flex;gap:3px;background:#1e2a3a;border-radius:7px;padding:2px">
+            <button id="district-mode-auto"
+              style="padding:3px 10px;font-size:11px;font-weight:700;border-radius:5px;border:none;background:#3b82f6;color:#fff;cursor:pointer">
+              Auto
+            </button>
+            <button id="district-mode-img"
+              style="padding:3px 10px;font-size:11px;font-weight:700;border-radius:5px;border:none;background:transparent;color:#94a3b8;cursor:pointer">
+              Imagen
+            </button>
+          </div>
+        </div>
+
+        <!-- Controles modo AUTO -->
+        <div id="district-auto-ctrl" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <label style="font-size:11px;color:var(--text-muted,#aaa)">N° sectores:</label>
+          <input type="number" id="district-nsectors" min="3" max="24" value="8"
+            style="width:52px;padding:3px 6px;border-radius:5px;border:1px solid var(--border-light,#333);
+                   background:var(--bg-input,#252d3d);color:var(--text-primary,#fff);font-size:12px;text-align:center">
+          <button id="district-regen"
+            style="padding:3px 12px;font-size:11px;font-weight:700;border-radius:5px;border:none;
+                   background:var(--blue,#3b82f6);color:#fff;cursor:pointer">↺ Regenerar</button>
+        </div>
+
+        <!-- Controles modo IMAGEN -->
+        <div id="district-img-ctrl" style="display:none;margin-bottom:6px">
+          <input type="file" id="district-scan-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <button id="district-scan-btn"
+              style="padding:4px 12px;font-size:11px;font-weight:700;border-radius:5px;border:none;background:#7c3aed;color:#fff;cursor:pointer">
+              Subir imagen escaneada
+            </button>
+            <span id="district-scan-status" style="font-size:11px;color:#94a3b8"></span>
+          </div>
+          <!-- Instrucciones de trazado (visible tras cargar imagen) -->
+          <div id="district-draw-hint" style="display:none;margin-top:8px;padding:8px 10px;background:#1e2a3a;border:1px solid #3b5080;border-radius:6px">
+            <div style="font-size:11px;color:#93c5fd;font-weight:600;margin-bottom:5px">
+              Traza los sectores haciendo clic en el mapa. Doble clic para cerrar cada sector.
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <button id="district-cancel-poly"
+                style="padding:2px 8px;font-size:10px;font-weight:700;border-radius:4px;border:1px solid #475569;background:transparent;color:#94a3b8;cursor:pointer">
+                Cancelar trazo
+              </button>
+              <button id="district-clear-polys"
+                style="padding:2px 8px;font-size:10px;font-weight:700;border-radius:4px;border:none;background:#ef4444;color:#fff;cursor:pointer">
+                Borrar todo
+              </button>
+              <span id="district-poly-count" style="font-size:11px;color:#64748b">0 sectores trazados</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="district-preview-map"
+          style="height:230px;border-radius:8px;overflow:hidden;border:1px solid var(--border-light,#333)"></div>
+        <div id="district-map-msg"
+          style="margin-top:5px;font-size:11px;color:var(--text-muted,#aaa);text-align:center;min-height:14px"></div>
+      `;
+      const form = document.getElementById('tenant-form');
+      if (form) form.appendChild(mapWrap);
+
+      // Eventos del input
+      inp.addEventListener('input', () => {
+        const q = inp.value.trim();
+        if (q.length < 2) { dd.style.display = 'none'; return; }
+        clearTimeout(_searchTimer);
+        _searchTimer = setTimeout(() => window._districtSearch(q, dd), 380);
+      });
+      inp.addEventListener('keydown', e => { if (e.key === 'Escape') dd.style.display = 'none'; });
+      document.addEventListener('click', e => {
+        if (!wrap.contains(e.target)) dd.style.display = 'none';
+      }, true);
+
+      // Delegación de eventos en el dropdown
+      dd.addEventListener('click', e => {
+        const opt = e.target.closest('.d-opt');
+        if (!opt) return;
+        window._districtSelect(_nominatimResults[+opt.dataset.i]);
+      });
+
+      document.getElementById('district-regen')?.addEventListener('click', () => {
+        if (_districtBoundaryGeoJSON) window._districtGenSectors(_districtBoundaryGeoJSON);
+      });
+      document.getElementById('district-nsectors')?.addEventListener('change', () => {
+        if (_districtBoundaryGeoJSON) window._districtGenSectors(_districtBoundaryGeoJSON);
+      });
+
+      // ── Tabs Auto / Imagen ────────────────────────────────────────────────
+      document.getElementById('district-mode-auto')?.addEventListener('click', () => {
+        document.getElementById('district-auto-ctrl').style.display = 'flex';
+        document.getElementById('district-img-ctrl').style.display  = 'none';
+        document.getElementById('district-mode-auto').style.cssText += ';background:#3b82f6;color:#fff';
+        document.getElementById('district-mode-img').style.cssText  += ';background:transparent;color:#94a3b8';
+        window._disableScanDrawMode();
+        // Quitar imagen superpuesta si la había
+        if (window._scanOverlay && _previewMap) { _previewMap.removeLayer(window._scanOverlay); window._scanOverlay = null; }
+        // Regenerar sectores automáticos
+        if (_districtBoundaryGeoJSON) window._districtGenSectors(_districtBoundaryGeoJSON);
+      });
+
+      document.getElementById('district-mode-img')?.addEventListener('click', () => {
+        document.getElementById('district-auto-ctrl').style.display = 'none';
+        document.getElementById('district-img-ctrl').style.display  = 'block';
+        document.getElementById('district-mode-img').style.cssText  += ';background:#7c3aed;color:#fff';
+        document.getElementById('district-mode-auto').style.cssText += ';background:transparent;color:#94a3b8';
+        // Limpiar sectores auto para no mezclar con los trazados a mano
+        if (_sectorsLayer && _previewMap) { _previewMap.removeLayer(_sectorsLayer); _sectorsLayer = null; }
+        window._districtSectorsGeoJSON = null;
+        window._scanDrawnSectors = [];
+        const msg = document.getElementById('district-map-msg');
+        if (msg) msg.textContent = 'Sube tu imagen escaneada y traza los sectores encima.';
+      });
+
+      // ── Subida de imagen escaneada ────────────────────────────────────────
+      document.getElementById('district-scan-btn')?.addEventListener('click', () => {
+        document.getElementById('district-scan-input').click();
+      });
+
+      document.getElementById('district-scan-input')?.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const statusEl = document.getElementById('district-scan-status');
+        statusEl.textContent = 'Cargando...';
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const imgUrl = ev.target.result;
+          if (!_previewMap || !_districtBoundaryGeoJSON) {
+            statusEl.textContent = 'Primero selecciona un distrito.';
+            return;
+          }
+          // Quitar overlay previo
+          if (window._scanOverlay) { _previewMap.removeLayer(window._scanOverlay); window._scanOverlay = null; }
+          // Calcular bounds del distrito para colocar la imagen
+          const feat = _districtBoundaryGeoJSON.type === 'Feature'
+            ? _districtBoundaryGeoJSON
+            : { type: 'Feature', geometry: _districtBoundaryGeoJSON, properties: {} };
+          const bounds = L.geoJSON(feat).getBounds();
+          window._scanOverlay = L.imageOverlay(imgUrl, bounds, { opacity: 0.55, interactive: false }).addTo(_previewMap);
+          _previewMap.fitBounds(bounds, { padding: [8, 8] });
+          statusEl.innerHTML = '<span style="color:#a78bfa;font-weight:700">✓ Imagen cargada</span>';
+          document.getElementById('district-draw-hint').style.display = 'block';
+          window._enableScanDrawMode();
+          e.target.value = '';
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // ── Cancelar trazo actual / Borrar todo ──────────────────────────────
+      document.getElementById('district-cancel-poly')?.addEventListener('click', () => {
+        window._cancelCurrentPoly();
+      });
+      document.getElementById('district-clear-polys')?.addEventListener('click', () => {
+        window._clearAllPolys();
+      });
+    };
+
+    window._districtSearch = async function(q, dd) {
+      dd.innerHTML = '<div style="padding:10px 12px;font-size:12px;color:#64748b">Buscando...</div>';
+      dd.style.display = 'block';
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q + ' Peru')}&countrycodes=pe&addressdetails=1&format=json&limit=10&accept-language=es`;
+        const data = await (await fetch(url)).json();
+        _nominatimResults = data;
+        if (!data.length) {
+          dd.innerHTML = `<div style="padding:10px 12px;font-size:12px;color:#64748b">Sin resultados para "${q}"</div>`;
+          return;
+        }
+        dd.innerHTML = data.map((r, i) => {
+          const a    = r.address || {};
+          const dist = a.municipality || a.city_district || a.suburb || a.village || a.city || a.town || r.display_name.split(',')[0];
+          const prov = a.county || a.state_district || '';
+          const dep  = a.state || '';
+          return `<div class="d-opt" data-i="${i}" style="
+            padding:9px 12px;cursor:pointer;border-bottom:1px solid #e2e8f0;
+            background:#ffffff;transition:background .12s
+          " onmouseover="this.style.background='#e0f2fe'"
+             onmouseout="this.style.background='#ffffff'">
+            <div style="font-size:13px;font-weight:600;color:#0f172a">${dist}</div>
+            <div style="font-size:11px;color:#64748b;margin-top:1px">${[prov, dep].filter(Boolean).join(' · ')}</div>
+          </div>`;
+        }).join('');
+      } catch(e) {
+        dd.innerHTML = '<div style="padding:10px 12px;font-size:12px;color:#ef4444">Error de conexión</div>';
+      }
+    };
+
+    window._districtSelect = async function(result) {
+      if (!result) return;
+      const a = result.address || {};
+      const dist = (a.municipality || a.city_district || a.suburb || a.village || a.city || a.town || result.display_name.split(',')[0]).trim();
+      const prov = (a.county || a.state_district || '').trim();
+
+      const nombreInp = document.getElementById('tenant-nombreDistrito');
+      const subInp    = document.getElementById('tenant-subdominio');
+      const provInp   = document.getElementById('tenant-nombreProvincia');
+      if (nombreInp) nombreInp.value = dist;
+      if (provInp)   provInp.value   = prov;
+      // Guardar en memoria para que _fillTenantLogos lo use inmediatamente tras crear
+      window._provByNombre?.set(dist, prov);
+      if (subInp && !subInp.value) {
+        subInp.value = dist.toLowerCase()
+          .normalize('NFD').replace(/[̀-ͯ]/g, '')
+          .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      }
+
+      const dd = document.getElementById('district-dropdown');
+      if (dd) dd.style.display = 'none';
+
+      const mw = document.getElementById('district-map-wrap');
+      if (mw) mw.style.display = 'block';
+
+      const msg = document.getElementById('district-map-msg');
+      if (msg) msg.textContent = 'Obteniendo límites del distrito...';
+
+      // ── Escudo municipal automático ──────────────────────────────────────
+      window._fetchEscudo(dist, prov);
+
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(result.display_name)}&format=json&limit=1&polygon_geojson=1&addressdetails=1`;
+        const [geo] = await (await fetch(url)).json();
+        if (!geo?.geojson) {
+          if (msg) msg.textContent = 'No se encontraron límites para este distrito.';
+          return;
+        }
+        _districtBoundaryGeoJSON = geo.geojson;
+        window._districtRenderMap(geo.geojson);
+        window._districtGenSectors(geo.geojson);
+      } catch(e) {
+        if (msg) msg.textContent = 'Error al obtener límites del distrito.';
+      }
+    };
+
+    window._normEscudo = function(s) {
+      return (s || '').toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    };
+    // alias local para uso interno del IIFE
+    const _normEscudo = window._normEscudo;
+
+    window._probeImage = function(url) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.onload  = () => resolve(url);
+        img.onerror = () => resolve(null);
+        img.src = url;
+      });
+    };
+    const _probeImage = window._probeImage;
+
+    window._fetchEscudo = async function(distrito, provincia) {
+      // Eliminar banner previo si existe
+      const prevBanner = document.getElementById('escudo-banner');
+      if (prevBanner) prevBanner.remove();
+
+      const logoInp = document.getElementById('tenant-logoUrl');
+      if (!logoInp) return;
+
+      const key = _normEscudo(distrito) + '_' + _normEscudo(provincia);
+      // Probar extensiones en orden de probabilidad
+      let url = null;
+      for (const ext of ['svg', 'png', 'jpg']) {
+        url = await _probeImage(`/escudos/${key}.${ext}`);
+        if (url) break;
+      }
+      if (!url) return;
+
+      const banner = document.createElement('div');
+      banner.id = 'escudo-banner';
+      banner.style.cssText = [
+        'display:flex;align-items:center;gap:10px;margin-top:8px;margin-bottom:6px',
+        'background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:8px 12px',
+      ].join(';');
+      banner.innerHTML = `
+        <img src="${url}" alt="Escudo" style="width:36px;height:36px;object-fit:contain;border-radius:4px;border:1px solid #e2e8f0;background:#fff;padding:2px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:700;color:#1d4ed8">Escudo oficial encontrado</div>
+          <div style="font-size:10px;color:#64748b;margin-top:1px">${distrito}</div>
+        </div>
+        <button type="button" id="escudo-usar-btn"
+          style="padding:4px 10px;font-size:11px;font-weight:700;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0">
+          Usar escudo
+        </button>
+      `;
+
+      // Insertar antes del widget de subida (si ya existe) o después del campo logoUrl
+      const uploadWrap = document.getElementById('logo-upload-wrap');
+      if (uploadWrap) {
+        uploadWrap.parentNode.insertBefore(banner, uploadWrap);
+      } else {
+        logoInp.parentNode?.insertBefore(banner, logoInp.nextSibling);
+      }
+
+      document.getElementById('escudo-usar-btn')?.addEventListener('click', () => {
+        logoInp.value = url;
+        logoInp.dispatchEvent(new Event('input', { bubbles: true }));
+        logoInp.dispatchEvent(new Event('change', { bubbles: true }));
+        banner.style.background = '#f0fdf4';
+        banner.style.borderColor = '#86efac';
+        const btn = document.getElementById('escudo-usar-btn');
+        if (btn) { btn.textContent = '✓ Aplicado'; btn.style.background = '#16a34a'; btn.disabled = true; }
+        // Limpiar status del upload si el usuario elige el escudo en vez de su archivo
+        const statusEl = document.getElementById('logo-upload-status');
+        if (statusEl) statusEl.textContent = '';
+      });
+    };
+
+    window._districtRenderMap = function(geojson) {
+      const container = document.getElementById('district-preview-map');
+      if (!container) return;
+      if (_previewMap) { _previewMap.remove(); _previewMap = null; _boundaryLayer = null; _sectorsLayer = null; }
+      _previewMap = L.map(container, { zoomControl: true, attributionControl: false });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(_previewMap);
+      const feat = geojson.type === 'Feature' ? geojson : { type: 'Feature', geometry: geojson, properties: {} };
+      _boundaryLayer = L.geoJSON(feat, {
+        style: { color: '#3b82f6', weight: 2.5, fillColor: '#3b82f6', fillOpacity: 0.12 }
+      }).addTo(_previewMap);
+      _previewMap.fitBounds(_boundaryLayer.getBounds(), { padding: [12, 12] });
+    };
+
+    window._districtGenSectors = function(geojson) {
+      if (!window.turf || !_previewMap) return;
+      const nEl = document.getElementById('district-nsectors');
+      const n   = Math.max(3, Math.min(24, parseInt(nEl?.value || '8', 10)));
+      const msg = document.getElementById('district-map-msg');
+      try {
+        const feat = geojson.type === 'Feature' ? geojson : turf.feature(geojson);
+        const bbox = turf.bbox(feat);
+        // Generar puntos aleatorios dentro del límite
+        let pts = [];
+        let tries = 0;
+        while (pts.length < n && tries < 40) {
+          turf.randomPoint(n * 4, { bbox }).features.forEach(p => {
+            if (pts.length < n) {
+              try { if (turf.booleanPointInPolygon(p, feat)) pts.push(p); } catch(e) {}
+            }
+          });
+          tries++;
+        }
+        if (pts.length < 2) { if (msg) msg.textContent = 'No se pudo generar sectores.'; return; }
+
+        const voronoi = turf.voronoi(turf.featureCollection(pts.slice(0, n)), { bbox });
+        const feats = [];
+        voronoi.features.forEach((cell, i) => {
+          try {
+            const clip = turf.intersect(cell, feat);
+            if (clip) {
+              clip.properties = { fid: feats.length + 1, id: feats.length + 1, Name: `Sector ${feats.length + 1}` };
+              feats.push(clip);
+            }
+          } catch(e) {}
+        });
+
+        if (!feats.length) { if (msg) msg.textContent = 'Error al recortar sectores.'; return; }
+
+        const sectors = turf.featureCollection(feats);
+        window._districtSectorsGeoJSON = sectors;
+
+        if (_sectorsLayer) { _previewMap.removeLayer(_sectorsLayer); _sectorsLayer = null; }
+        const COLS = ['#e63946','#2a9d8f','#e9c46a','#6a4fcf','#f4a261','#457b9d','#e76f51','#2dc653','#ff6b6b','#118ab2','#ffd166','#9b5de5'];
+        _sectorsLayer = L.geoJSON(sectors, {
+          style: f => ({
+            color: '#fff', weight: 2,
+            fillColor: COLS[(f.properties.id - 1) % COLS.length],
+            fillOpacity: 0.82
+          }),
+          onEachFeature: (f, layer) => {
+            layer.bindTooltip(f.properties.Name, { permanent: true, direction: 'center', className: 'leaflet-tooltip-mini' });
+          }
+        }).addTo(_previewMap);
+
+        if (msg) msg.textContent = `✓ ${feats.length} sectores generados — ajusta la cantidad y presiona Regenerar`;
+      } catch(e) {
+        if (msg) msg.textContent = 'Error: ' + e.message;
+      }
+    };
+
+    // ── Dibujo manual de polígonos (modo imagen escaneada) ───────────────
+    window._scanDrawnSectors  = [];   // features GeoJSON finalizados
+    window._scanCurrentPts    = [];   // vértices del polígono en curso
+    window._scanOverlay       = null; // L.imageOverlay activo
+    window._scanPolyLine      = null; // polilínea de preview del trazo
+    window._scanDotLayers     = [];   // marcadores de vértices
+    window._scanFinishedLayers= [];   // polígonos ya cerrados
+
+    const SCAN_COLORS = ['#e63946','#2a9d8f','#e9c46a','#6a4fcf','#f4a261','#457b9d','#e76f51','#2dc653','#ff6b6b','#118ab2','#ffd166','#9b5de5'];
+
+    window._enableScanDrawMode = function() {
+      if (!_previewMap) return;
+      _previewMap.on('click',    window._scanMapClick);
+      _previewMap.on('dblclick', window._scanMapDblClick);
+      _previewMap.getContainer().style.cursor = 'crosshair';
+    };
+
+    window._disableScanDrawMode = function() {
+      if (!_previewMap) return;
+      _previewMap.off('click',    window._scanMapClick);
+      _previewMap.off('dblclick', window._scanMapDblClick);
+      _previewMap.getContainer().style.cursor = '';
+    };
+
+    window._scanMapClick = function(e) {
+      // Leaflet dispara click antes que dblclick — ignorar el 2.º click del doble
+      if (window._scanDblGuard) { window._scanDblGuard = false; return; }
+      const pt = [e.latlng.lat, e.latlng.lng];
+      window._scanCurrentPts.push(pt);
+
+      // Dot de vértice
+      const dot = L.circleMarker(pt, { radius: 4, color: '#a78bfa', fillColor: '#a78bfa', fillOpacity: 1, weight: 1 }).addTo(_previewMap);
+      window._scanDotLayers.push(dot);
+
+      // Línea de preview
+      if (window._scanPolyLine) _previewMap.removeLayer(window._scanPolyLine);
+      if (window._scanCurrentPts.length >= 2) {
+        window._scanPolyLine = L.polyline(window._scanCurrentPts, { color: '#a78bfa', weight: 2, dashArray: '5 4' }).addTo(_previewMap);
+      }
+    };
+
+    window._scanMapDblClick = function() {
+      window._scanDblGuard = true;
+      if (window._scanCurrentPts.length < 3) {
+        window._cancelCurrentPoly();
+        return;
+      }
+      window._closePoly();
+    };
+
+    window._closePoly = function() {
+      const pts = window._scanCurrentPts;
+      if (pts.length < 3) return;
+
+      const idx   = window._scanDrawnSectors.length + 1;
+      const color = SCAN_COLORS[(idx - 1) % SCAN_COLORS.length];
+
+      // Polígono permanente en el mapa
+      const poly = L.polygon(pts, { color: '#fff', weight: 2, fillColor: color, fillOpacity: 0.72 }).addTo(_previewMap);
+      poly.bindTooltip(`Sector ${idx}`, { permanent: true, direction: 'center', className: 'leaflet-tooltip-mini' });
+      window._scanFinishedLayers.push(poly);
+
+      // Feature GeoJSON
+      const ring = [...pts.map(p => [p[1], p[0]]), [pts[0][1], pts[0][0]]];
+      window._scanDrawnSectors.push({
+        type: 'Feature',
+        properties: { fid: idx, id: idx, Name: `Sector ${idx}` },
+        geometry: { type: 'Polygon', coordinates: [ring] }
+      });
+      window._districtSectorsGeoJSON = { type: 'FeatureCollection', features: window._scanDrawnSectors };
+
+      // Limpiar trazo en curso
+      window._clearCurrentTrace();
+
+      // Actualizar contador y mensaje
+      const n   = window._scanDrawnSectors.length;
+      const cnt = document.getElementById('district-poly-count');
+      if (cnt) cnt.textContent = `${n} sector${n !== 1 ? 'es' : ''} trazado${n !== 1 ? 's' : ''}`;
+      const msg = document.getElementById('district-map-msg');
+      if (msg) msg.textContent = `✓ ${n} sector${n !== 1 ? 'es' : ''} — sigue trazando o guarda el municipio.`;
+    };
+
+    window._cancelCurrentPoly = function() {
+      window._clearCurrentTrace();
+      const msg = document.getElementById('district-map-msg');
+      if (msg && window._scanDrawnSectors.length === 0) msg.textContent = 'Trazo cancelado. Haz clic para empezar de nuevo.';
+    };
+
+    window._clearCurrentTrace = function() {
+      if (window._scanPolyLine) { _previewMap?.removeLayer(window._scanPolyLine); window._scanPolyLine = null; }
+      window._scanDotLayers.forEach(d => _previewMap?.removeLayer(d));
+      window._scanDotLayers = [];
+      window._scanCurrentPts = [];
+    };
+
+    window._clearAllPolys = function() {
+      window._clearCurrentTrace();
+      window._scanFinishedLayers.forEach(l => _previewMap?.removeLayer(l));
+      window._scanFinishedLayers = [];
+      window._scanDrawnSectors   = [];
+      window._districtSectorsGeoJSON = null;
+      const cnt = document.getElementById('district-poly-count');
+      if (cnt) cnt.textContent = '0 sectores trazados';
+      const msg = document.getElementById('district-map-msg');
+      if (msg) msg.textContent = 'Sectores borrados. Traza de nuevo.';
+    };
+
+    // Estilos para tooltips del mini mapa
+    const st = document.createElement('style');
+    st.textContent = `.leaflet-tooltip-mini{background:transparent;border:none;box-shadow:none;color:#fff;font-size:9px;font-weight:700;padding:0;text-shadow:0 1px 2px rgba(0,0,0,.8)}`;
+    document.head.appendChild(st);
+  })();
+
+  window.guardarCredenciales = async function() {
+    const tenantId = document.getElementById('cred-tenant-id').value;
+    const userId = document.getElementById('cred-user-id').value;
+    const username = document.getElementById('cred-username').value.trim();
+    const password = document.getElementById('cred-password').value;
+    const msg = document.getElementById('cred-msg');
+
+    if (!username && !password) { msg.style.color='#ef4444'; msg.textContent='Ingresa al menos usuario o contraseña.'; return; }
+
+    const token = localStorage.getItem('sgti_token');
+    try {
+      msg.style.color='var(--text-muted)'; msg.textContent='Guardando...';
+      const res = await fetch('/api/superadmin/tenants/' + tenantId + '/usuarios/' + userId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ username: username || undefined, password: password || undefined })
+      });
+      const data = await res.json();
+      if (!res.ok) { msg.style.color='#ef4444'; msg.textContent = data.error || 'Error al guardar.'; return; }
+      msg.style.color='#22c55e'; msg.textContent = '✓ ' + data.mensaje;
+      setTimeout(() => document.getElementById('modal-credenciales').style.display='none', 1500);
+    } catch(e) {
+      msg.style.color='#ef4444'; msg.textContent='Error de conexión.';
+    }
+  };
+  </script>
+
+  <script>
+  // Eliminar texto "v5 Premium" del sidebar
+  (function() {
+    function _quitarVersion() {
+      document.querySelectorAll('span, div').forEach(el => {
+        if (el.children.length === 0 && /^v\d+\s+(Premium|Pro|Plus|Beta)$/i.test(el.textContent.trim())) {
+          el.style.display = 'none';
+        }
+      });
+    }
+    const obs = new MutationObserver(_quitarVersion);
+    obs.observe(document.body, { childList: true, subtree: true });
+    _quitarVersion();
+  })();
+  </script>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       Inyección: opción "Imagen escaneada" junto al uploader GeoJSON
+       del panel administrador del municipio (equipo/configuración)
+  ══════════════════════════════════════════════════════════════════ -->
+  <script>
+  (function() {
+    // Si la URL es /dashboard/mapa (F5 o recarga tras guardar): navegar al mapa Y reinyectar sectores
+    if (window.location.pathname === '/dashboard/mapa') {
+      // 1. Navegar via router en cuanto esté disponible
+      const _tryAutoNav = (n) => {
+        if (window.router) { window.router.navigate('/dashboard/mapa'); return; }
+        if (n < 40) setTimeout(() => _tryAutoNav(n + 1), 150);
+      };
+      _tryAutoNav(0);
+      // 2. Esperar a que window.map aparezca y reinyectar la capa de sectores
+      const _tryReInject = (n) => {
+        const map = window.map;
+        if (!map) {
+          if (n < 30) setTimeout(() => _tryReInject(n + 1), 300);
+          return;
+        }
+        const tk = localStorage.getItem('sgti_token') || '';
+        if (!tk) return;
+        fetch('/api/equipo/geojson/default', {
+          headers: { Authorization: `Bearer ${tk}` }, credentials: 'include'
+        })
+        .then(r => r.json())
+        .then(geo => {
+          if (!geo?.features?.length) return;
+          if (window._scanInjectedLayer) {
+            try { map.removeLayer(window._scanInjectedLayer); } catch(_) {}
+          }
+          window._scanInjectedLayer = _buildSectorLayer(geo, map);
+          map.fitBounds(window._scanInjectedLayer.getBounds(), { padding:[30,30] });
+          window.sectoresGeoJSONFeatures = geo.features;
+        })
+        .catch(() => {});
+      };
+      setTimeout(() => _tryReInject(0), 600);
+    }
+
+    const SCAN_COLORS = ['#e63946','#2a9d8f','#e9c46a','#6a4fcf','#f4a261','#457b9d','#e76f51','#2dc653','#ff6b6b','#118ab2','#ffd166','#9b5de5'];
+    // Iconos para manejadores de imagen
+    const _cornerIcon = () => L.divIcon({ className:'', iconSize:[0,0],
+      html:'<div style="width:14px;height:14px;background:#fff;border:2.5px solid #7c3aed;border-radius:3px;cursor:nwse-resize;margin:-7px 0 0 -7px;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>' });
+    const _centerIcon = () => L.divIcon({ className:'', iconSize:[0,0],
+      html:'<div style="width:22px;height:22px;background:rgba(124,58,237,.85);border:2.5px solid #fff;border-radius:50%;cursor:move;margin:-11px 0 0 -11px;box-shadow:0 2px 6px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff">✥</div>' });
+
+    /* ── Observar cuando aparece el dropzone de GeoJSON ─────────────── */
+    const _obsGeo = new MutationObserver(() => {
+      const dz = document.getElementById('geojson-dropzone');
+      if (!dz || dz.dataset.scanInjected) return;
+      dz.dataset.scanInjected = '1';
+
+      const btn = document.createElement('button');
+      btn.id = 'scan-sector-open-btn';
+      btn.type = 'button';
+      btn.style.cssText = [
+        'display:flex;align-items:center;gap:8px;width:100%;margin-top:10px',
+        'padding:10px 16px;border-radius:8px;border:2px dashed #7c3aed',
+        'background:rgba(124,58,237,0.06);color:#a78bfa',
+        'font-size:12.5px;font-weight:700;cursor:pointer',
+        'justify-content:center;box-sizing:border-box'
+      ].join(';');
+      btn.innerHTML = `<span style="font-size:16px">🗺️</span> O dibuja sectores desde una imagen escaneada`;
+      btn.onmouseenter = () => { btn.style.background = 'rgba(124,58,237,0.14)'; };
+      btn.onmouseleave = () => { btn.style.background = 'rgba(124,58,237,0.06)'; };
+      btn.addEventListener('click', _openScanModal);
+      dz.parentNode.insertBefore(btn, dz.nextSibling);
+    });
+    _obsGeo.observe(document.body, { childList: true, subtree: true });
+
+    /* ── Abrir modal ─────────────────────────────────────────────────── */
+    function _openScanModal() {
+      let modal = document.getElementById('scan-sector-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'scan-sector-modal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(5,10,20,0.9);display:flex;flex-direction:column';
+        modal.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:#0f172a;border-bottom:1px solid #1e3a5f;flex-shrink:0">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:18px">🗺️</span>
+              <div>
+                <div style="font-size:13px;font-weight:800;color:#e2e8f0">Sectores desde imagen escaneada</div>
+                <div style="font-size:10.5px;color:#64748b">Sube tu mapa impreso → traza sectores haciendo clic → doble clic para cerrar cada uno</div>
+              </div>
+            </div>
+            <button id="scan-modal-close" style="width:30px;height:30px;border-radius:50%;border:none;background:#1e293b;color:#94a3b8;font-size:16px;cursor:pointer;font-weight:700">✕</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:#0f172a;border-bottom:1px solid #1e3a5f;flex-shrink:0;flex-wrap:wrap">
+            <input type="file" id="scan-img-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+            <button id="scan-img-btn" style="padding:5px 14px;font-size:11.5px;font-weight:700;border-radius:6px;border:none;background:#7c3aed;color:#fff;cursor:pointer">Subir imagen</button>
+            <!-- Controles de ajuste (visibles solo cuando hay imagen) -->
+            <div id="scan-img-adjust" style="display:none;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="font-size:10.5px;color:#64748b;font-weight:600">Opacidad:</span>
+              <input type="range" id="scan-opacity" min="10" max="100" value="55" style="width:80px;accent-color:#7c3aed;cursor:pointer">
+              <span style="font-size:10px;color:#94a3b8">Arrastra esquinas ✦ o centro ✥ para ajustar</span>
+            </div>
+            <div style="width:1px;height:20px;background:#1e3a5f;flex-shrink:0"></div>
+            <button id="scan-close-poly" style="padding:5px 12px;font-size:11.5px;font-weight:700;border-radius:6px;border:none;background:#065f46;color:#6ee7b7;cursor:pointer">Cerrar sector</button>
+            <button id="scan-cancel-poly" style="padding:5px 12px;font-size:11.5px;font-weight:700;border-radius:6px;border:1px solid #334155;background:transparent;color:#94a3b8;cursor:pointer">Cancelar trazo</button>
+            <button id="scan-clear-all" style="padding:5px 12px;font-size:11.5px;font-weight:700;border-radius:6px;border:none;background:#7f1d1d;color:#fca5a5;cursor:pointer">Borrar todo</button>
+            <span id="scan-poly-count" style="font-size:11.5px;color:#64748b;margin-left:4px">0 sectores trazados</span>
+            <div style="flex:1"></div>
+            <button id="scan-save-btn" disabled style="padding:5px 18px;font-size:12px;font-weight:800;border-radius:6px;border:none;background:#1e3a5f;color:#64748b;cursor:not-allowed;transition:.2s">Guardar sectores</button>
+          </div>
+          <div id="scan-map" style="flex:1;min-height:0"></div>
+          <div id="scan-status-bar" style="padding:6px 14px;background:#0f172a;border-top:1px solid #1e3a5f;font-size:11px;color:#64748b;flex-shrink:0;min-height:26px">
+            Sube una imagen y luego traza los sectores haciendo clic en el mapa.
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        const scanMap = L.map('scan-map', { zoomControl: true, attributionControl: false, doubleClickZoom: false });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(scanMap);
+        scanMap.setView([-12.04, -77.04], 13);
+        window._scanModalMap = scanMap;
+
+        fetch('/api/equipo/geojson/default', { credentials: 'include' })
+          .then(r => r.json()).then(geo => {
+            if (geo?.type === 'FeatureCollection' && geo.features?.length > 0) {
+              try {
+                const layer = L.geoJSON(geo, { style: { color:'#3b82f6', weight:1.5, fillOpacity:0.08 } }).addTo(scanMap);
+                scanMap.fitBounds(layer.getBounds(), { padding:[20,20] });
+                window._scanBaseBounds = layer.getBounds();
+              } catch(e) {}
+            }
+          }).catch(()=>{});
+
+        window._scanModalPts        = [];
+        window._scanModalSectors    = [];
+        window._scanModalLayers     = [];
+        window._scanModalPolyline   = null;
+        window._scanModalDots       = [];
+        window._scanModalImgOverlay = null;
+        window._scanClickTimer      = null;
+
+        document.getElementById('scan-modal-close').addEventListener('click', _closeScanModal);
+        document.getElementById('scan-img-btn').addEventListener('click', () => document.getElementById('scan-img-input').click());
+        document.getElementById('scan-img-input').addEventListener('change', _handleScanImage);
+        document.getElementById('scan-close-poly').addEventListener('click', () => {
+          if (window._scanClickTimer) { clearTimeout(window._scanClickTimer); window._scanClickTimer = null; }
+          if (window._scanModalPts.length >= 3) _scanClosePoly(); else _scanCancelPoly();
+        });
+        document.getElementById('scan-cancel-poly').addEventListener('click', _scanCancelPoly);
+        document.getElementById('scan-clear-all').addEventListener('click', _scanClearAll);
+        document.getElementById('scan-save-btn').addEventListener('click', _scanSave);
+        scanMap.on('click', _scanClick);
+        scanMap.getContainer().style.cursor = 'crosshair';
+      }
+      modal.style.display = 'flex';
+      setTimeout(() => window._scanModalMap?.invalidateSize(), 120);
+    }
+
+    function _closeScanModal() {
+      const m = document.getElementById('scan-sector-modal');
+      if (m) m.style.display = 'none';
+    }
+
+    /* ── Imagen + manejadores de ajuste ─────────────────────────────── */
+    function _handleScanImage(e) {
+      const file = e.target.files?.[0]; if (!file) return;
+      document.getElementById('scan-status-bar').textContent = 'Cargando imagen...';
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const map = window._scanModalMap; if (!map) return;
+        _scanRemoveImgControls();
+        if (window._scanModalImgOverlay) { map.removeLayer(window._scanModalImgOverlay); window._scanModalImgOverlay = null; }
+        const bounds = window._scanBaseBounds || map.getBounds();
+        window._scanModalImgOverlay = L.imageOverlay(ev.target.result, bounds, { opacity: 0.55, interactive: false }).addTo(map);
+        map.fitBounds(bounds, { padding:[20,20] });
+        _scanCreateImgControls(bounds);
+        document.getElementById('scan-img-adjust').style.display = 'flex';
+        document.getElementById('scan-status-bar').textContent =
+          'Imagen cargada. Arrastra las esquinas ✦ o el centro ✥ para alinearla. Luego traza los sectores (clic = vértice, doble clic = cerrar sector).';
+        e.target.value = '';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function _scanCreateImgControls(bounds) {
+      const map = window._scanModalMap;
+      let sw = bounds.getSouthWest(), ne = bounds.getNorthEast();
+
+      function corners() {
+        return {
+          sw, ne,
+          se: L.latLng(sw.lat, ne.lng),
+          nw: L.latLng(ne.lat, sw.lng),
+          c:  L.latLng((sw.lat+ne.lat)/2, (sw.lng+ne.lng)/2),
+        };
+      }
+      function reposition() {
+        const c = corners();
+        mSW.setLatLng(c.sw); mNE.setLatLng(c.ne);
+        mSE.setLatLng(c.se); mNW.setLatLng(c.nw);
+        mC.setLatLng(c.c);
+        window._scanModalImgOverlay.setBounds(L.latLngBounds(sw, ne));
+        window._scanBaseBounds = L.latLngBounds(sw, ne);
+      }
+
+      const mSW = L.marker(corners().sw, { draggable:true, icon:_cornerIcon(), zIndexOffset:1000 }).addTo(map);
+      const mNE = L.marker(corners().ne, { draggable:true, icon:_cornerIcon(), zIndexOffset:1000 }).addTo(map);
+      const mSE = L.marker(corners().se, { draggable:true, icon:_cornerIcon(), zIndexOffset:1000 }).addTo(map);
+      const mNW = L.marker(corners().nw, { draggable:true, icon:_cornerIcon(), zIndexOffset:1000 }).addTo(map);
+      const mC  = L.marker(corners().c,  { draggable:true, icon:_centerIcon(), zIndexOffset:1001 }).addTo(map);
+
+      // Arrastar esquinas — cada una mueve sus dos coordenadas
+      mSW.on('drag', ev => { sw = L.latLng(ev.latlng.lat, ev.latlng.lng); reposition(); });
+      mNE.on('drag', ev => { ne = L.latLng(ev.latlng.lat, ev.latlng.lng); reposition(); });
+      mSE.on('drag', ev => { sw = L.latLng(ev.latlng.lat, sw.lng); ne = L.latLng(ne.lat, ev.latlng.lng); reposition(); });
+      mNW.on('drag', ev => { ne = L.latLng(ev.latlng.lat, ev.latlng.lng); sw = L.latLng(sw.lat, ne.lng); ne = L.latLng(ev.latlng.lat, ne.lng); reposition(); });
+
+      // Arrastar centro — desplaza toda la imagen
+      let _prevC = null;
+      mC.on('dragstart', () => { _prevC = mC.getLatLng(); });
+      mC.on('drag', ev => {
+        if (!_prevC) return;
+        const dLat = ev.latlng.lat - _prevC.lat;
+        const dLng = ev.latlng.lng - _prevC.lng;
+        sw = L.latLng(sw.lat+dLat, sw.lng+dLng);
+        ne = L.latLng(ne.lat+dLat, ne.lng+dLng);
+        _prevC = ev.latlng;
+        reposition();
+      });
+
+      // Slider de opacidad
+      const opSlider = document.getElementById('scan-opacity');
+      if (opSlider) {
+        opSlider.oninput = () => { window._scanModalImgOverlay?.setOpacity(+opSlider.value / 100); };
+      }
+
+      window._scanImgControlMarkers = [mSW, mNE, mSE, mNW, mC];
+    }
+
+    function _scanRemoveImgControls() {
+      (window._scanImgControlMarkers || []).forEach(m => window._scanModalMap?.removeLayer(m));
+      window._scanImgControlMarkers = [];
+    }
+
+    /* ── Dibujo ──────────────────────────────────────────────────────── */
+    // Timer de 150ms: si llega un 2.º clic antes de que expire → doble clic → cerrar sector
+    function _scanClick(e) {
+      if (window._scanClickTimer) {
+        clearTimeout(window._scanClickTimer);
+        window._scanClickTimer = null;
+        if (window._scanModalPts.length >= 3) _scanClosePoly(); else _scanCancelPoly();
+        return;
+      }
+      window._scanClickTimer = setTimeout(() => {
+        window._scanClickTimer = null;
+        const pt = [e.latlng.lat, e.latlng.lng];
+        window._scanModalPts.push(pt);
+        const dot = L.circleMarker(pt, { radius:4, color:'#a78bfa', fillColor:'#a78bfa', fillOpacity:1, weight:1 }).addTo(window._scanModalMap);
+        window._scanModalDots.push(dot);
+        if (window._scanModalPolyline) window._scanModalMap.removeLayer(window._scanModalPolyline);
+        if (window._scanModalPts.length >= 2)
+          window._scanModalPolyline = L.polyline(window._scanModalPts, { color:'#a78bfa', weight:2, dashArray:'5 4' }).addTo(window._scanModalMap);
+        const n = window._scanModalPts.length;
+        const sb = document.getElementById('scan-status-bar');
+        if (sb) sb.textContent = n === 1 ? 'Vértice 1 agregado. Sigue haciendo clic para trazar el sector.'
+          : `${n} vértices. Doble clic o "Cerrar sector" para completar el sector.`;
+      }, 150);
+    }
+
+    function _scanUpdateCounter() {
+      const n = window._scanModalSectors.length;
+      document.getElementById('scan-poly-count').textContent = `${n} sector${n!==1?'es':''} trazado${n!==1?'s':''}`;
+      const sb = document.getElementById('scan-save-btn');
+      if (n > 0) { sb.disabled = false; sb.style.background = '#16a34a'; sb.style.color = '#fff'; sb.style.cursor = 'pointer'; }
+      else        { sb.disabled = true;  sb.style.background = '#1e3a5f'; sb.style.color = '#64748b'; sb.style.cursor = 'not-allowed'; }
+    }
+
+    function _scanDeleteSector(layerRef) {
+      // Eliminar de arrays por referencia
+      const li = window._scanModalLayers.indexOf(layerRef);
+      if (li !== -1) {
+        window._scanModalMap.removeLayer(window._scanModalLayers[li]);
+        window._scanModalLayers.splice(li, 1);
+        window._scanModalSectors.splice(li, 1);
+        // Re-numerar los sectores restantes y sus tooltips
+        window._scanModalSectors.forEach((f, i) => {
+          f.properties.fid = i+1; f.properties.id = i+1; f.properties.Name = `Sector ${i+1}`;
+          const lyr = window._scanModalLayers[i];
+          lyr.closeTooltip(); lyr.unbindTooltip();
+          lyr.bindTooltip(`Sector ${i+1}`, { permanent:true, direction:'center', className:'leaflet-tooltip-mini' });
+        });
+        _scanUpdateCounter();
+        document.getElementById('scan-status-bar').textContent = 'Sector eliminado. Sigue trazando o guarda los restantes.';
+      }
+    }
+
+    function _scanClosePoly() {
+      const pts = window._scanModalPts; if (pts.length < 3) return;
+      const idx   = window._scanModalSectors.length + 1;
+      const color = SCAN_COLORS[(idx-1) % SCAN_COLORS.length];
+      const poly  = L.polygon(pts, { color:'#fff', weight:2, fillColor:color, fillOpacity:0.68 }).addTo(window._scanModalMap);
+      poly.bindTooltip(`Sector ${idx}`, { permanent:true, direction:'center', className:'leaflet-tooltip-mini' });
+      // Popup de eliminación al hacer clic en el polígono
+      poly.on('click', function(e) {
+        // Detener propagación al mapa para que no añada un vértice
+        if (e.originalEvent) { e.originalEvent.stopPropagation(); e.originalEvent.preventDefault(); }
+        L.DomEvent.stop(e);
+        if (window._scanClickTimer) { clearTimeout(window._scanClickTimer); window._scanClickTimer = null; }
+        const self = this;
+        window.__scanPopupLayer = self;
+        const nombre = self.getTooltip()?.getContent() || 'Sector';
+        L.popup({ closeButton:true, autoClose:true })
+          .setLatLng(e.latlng)
+          .setContent(`<div style="text-align:center;padding:2px 4px">
+            <div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">${nombre}</div>
+            <button onclick="window._scanDeleteSector(window.__scanPopupLayer)" style="width:100%;padding:6px 12px;background:#dc2626;color:#fff;border:none;border-radius:5px;font-size:11.5px;font-weight:700;cursor:pointer">Eliminar este sector</button>
+          </div>`)
+          .openOn(window._scanModalMap);
+      });
+      window._scanModalLayers.push(poly);
+      const ring = [...pts.map(p=>[p[1],p[0]]), [pts[0][1],pts[0][0]]];
+      window._scanModalSectors.push({ type:'Feature', properties:{ fid:idx, id:idx, Name:`Sector ${idx}` }, geometry:{ type:'Polygon', coordinates:[ring] } });
+      _scanClearTrace();
+      _scanUpdateCounter();
+      document.getElementById('scan-status-bar').textContent = `✓ Sector ${idx} cerrado. Clic en un sector para eliminarlo. Sigue trazando o guarda.`;
+    }
+
+    function _scanCancelPoly() {
+      _scanClearTrace();
+      document.getElementById('scan-status-bar').textContent = 'Trazo cancelado. Haz clic para empezar de nuevo.';
+    }
+
+    function _scanClearTrace() {
+      if (window._scanModalPolyline) { window._scanModalMap.removeLayer(window._scanModalPolyline); window._scanModalPolyline = null; }
+      window._scanModalDots.forEach(d => window._scanModalMap.removeLayer(d));
+      window._scanModalDots = []; window._scanModalPts = [];
+    }
+
+    function _scanClearAll() {
+      _scanClearTrace();
+      _scanRemoveImgControls();
+      if (window._scanModalImgOverlay) { window._scanModalMap?.removeLayer(window._scanModalImgOverlay); window._scanModalImgOverlay = null; }
+      window._scanModalLayers.forEach(l => window._scanModalMap.removeLayer(l));
+      window._scanModalLayers = []; window._scanModalSectors = [];
+      _scanUpdateCounter();
+      document.getElementById('scan-img-adjust').style.display = 'none';
+      document.getElementById('scan-status-bar').textContent = 'Todo borrado. Sube una nueva imagen o traza de nuevo.';
+      const sb = document.getElementById('scan-save-btn');
+      sb.disabled = true; sb.style.background = '#1e3a5f'; sb.style.color = '#64748b'; sb.style.cursor = 'not-allowed';
+    }
+
+    /* ── Guardar al servidor ─────────────────────────────────────────── */
+    async function _scanSave() {
+      if (!window._scanModalSectors.length) return;
+      const sb  = document.getElementById('scan-save-btn');
+      const bar = document.getElementById('scan-status-bar');
+      sb.disabled = true; sb.textContent = 'Guardando...';
+      bar.textContent = 'Enviando sectores al servidor...';
+      const geojson = { type:'FeatureCollection', features: window._scanModalSectors };
+      try {
+        const tk  = localStorage.getItem('sgti_token') || '';
+        const res = await fetch('/api/equipo/upload-geojson', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', Authorization:`Bearer ${tk}` },
+          credentials: 'include',
+          body: JSON.stringify(geojson),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+        bar.innerHTML = '<span style="color:#4ade80;font-weight:700">✓ Sectores guardados. Cargando en el mapa...</span>';
+        sb.textContent = '✓ Guardado';
+
+        // Navegar al mapa vía router SPA
+        if (window.router) window.router.navigate('/dashboard/mapa');
+
+        // Esperar a que window.map esté activo e inyectar la capa
+        setTimeout(async () => {
+          const COLORS = ['#f87171','#fbbf24','#34d399','#60a5fa','#a78bfa','#f472b6','#fb923c','#22d3ee'];
+          const tryInject = async (attempt) => {
+            const map = window.map;
+            if (!map) {
+              if (attempt < 10) return setTimeout(() => tryInject(attempt+1), 400);
+              return;
+            }
+            try {
+              const tkk = localStorage.getItem('sgti_token') || '';
+              const r2  = await fetch('/api/equipo/geojson/default', {
+                headers: { Authorization: `Bearer ${tkk}` }, credentials: 'include'
+              });
+              const geo = await r2.json();
+              if (!geo?.features?.length) { _closeScanModal(); return; }
+              if (window._scanInjectedLayer) {
+                try { map.removeLayer(window._scanInjectedLayer); } catch(_) {}
+                window._scanInjectedLayer = null;
+              }
+              window._scanInjectedLayer = _buildSectorLayer(geo, map);
+              map.fitBounds(window._scanInjectedLayer.getBounds(), { padding:[30,30] });
+              window.sectoresGeoJSONFeatures = geo.features;
+              history.replaceState({}, '', '/dashboard/mapa');
+              bar.innerHTML = '<span style="color:#4ade80;font-weight:700">Sectores visibles. Haz clic en uno para editar nombre o eliminar.</span>';
+              setTimeout(() => _closeScanModal(), 2500);
+            } catch(e2) { console.error('[scanSave]', e2.message); }
+          };
+          tryInject(0);
+        }, 600);
+      } catch(err) {
+        bar.innerHTML = `<span style="color:#f87171">Error: ${err.message}</span>`;
+        sb.disabled = false; sb.textContent = 'Guardar sectores';
+      }
+    }
+
+    // Construye el L.geoJSON con popup de edición (usado tanto al guardar como al recargar)
+    function _buildSectorLayer(geo, map) {
+      const COLORS = ['#f87171','#fbbf24','#34d399','#60a5fa','#a78bfa','#f472b6','#fb923c','#22d3ee'];
+      return L.geoJSON(geo, {
+        style: f => ({
+          fillColor: COLORS[((f.properties.id||1)-1) % COLORS.length],
+          weight: 2, opacity: 0.9, color: 'white',
+          dashArray: '2', fillOpacity: 0.45
+        }),
+        onEachFeature: (f, layer) => {
+          const nm = f.properties.Name || 'Sector';
+          layer.bindTooltip(nm, { permanent:true, direction:'center', className:'leaflet-tooltip-mini' });
+          layer.on('click', function(e) {
+            if (e.originalEvent) e.originalEvent.stopPropagation();
+            window.__scanEditLayer   = this;
+            window.__scanEditFeature = f;
+            const cur = f.properties.Name || 'Sector';
+            L.popup({ closeButton:true, autoClose:true })
+              .setLatLng(e.latlng)
+              .setContent(`<div style="min-width:180px;padding:4px 2px">
+                <div style="font-size:11px;color:#94a3b8;margin-bottom:6px;font-weight:600;letter-spacing:.05em">EDITAR SECTOR</div>
+                <input id="_scanRenameInput" type="text" value="${cur.replace(/"/g,'&quot;')}"
+                  style="width:100%;box-sizing:border-box;padding:5px 8px;background:#0f172a;border:1px solid #334155;border-radius:5px;color:#e2e8f0;font-size:12px;margin-bottom:8px"
+                  onkeydown="if(event.key==='Enter')window._scanApplyRename()">
+                <div style="display:flex;gap:6px">
+                  <button onclick="window._scanApplyRename()"
+                    style="flex:1;padding:5px 4px;background:#3b82f6;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">
+                    Guardar nombre
+                  </button>
+                  <button onclick="window._scanDeleteInjectedSector()"
+                    style="flex:1;padding:5px 4px;background:#dc2626;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">
+                    Eliminar
+                  </button>
+                </div>
+              </div>`)
+              .openOn(map);
+          });
+        }
+      }).addTo(map);
+    }
+
+    // Renombrar sector inyectado desde el popup del mapa principal
+    window._scanApplyRename = function() {
+      const input = document.getElementById('_scanRenameInput');
+      if (!input || !window.__scanEditFeature || !window.__scanEditLayer) return;
+      const newName = input.value.trim();
+      if (!newName) return;
+      window.__scanEditFeature.properties.Name = newName;
+      window.__scanEditLayer.closeTooltip();
+      window.__scanEditLayer.unbindTooltip();
+      window.__scanEditLayer.bindTooltip(newName, { permanent:true, direction:'center', className:'leaflet-tooltip-mini' });
+      if (window.map) window.map.closePopup();
+      window._scanResaveInjected();
+    };
+
+    // Eliminar sector inyectado desde el popup del mapa principal
+    window._scanDeleteInjectedSector = function() {
+      if (!window._scanInjectedLayer || !window.__scanEditLayer) return;
+      window._scanInjectedLayer.removeLayer(window.__scanEditLayer);
+      if (window.map) window.map.closePopup();
+      window._scanResaveInjected();
+    };
+
+    // Re-guardar al servidor el estado actual del layer inyectado
+    window._scanResaveInjected = async function() {
+      const lyr = window._scanInjectedLayer;
+      if (!lyr) return;
+      const features = [];
+      lyr.eachLayer(l => { if (l.feature) features.push(l.feature); });
+      const tk = localStorage.getItem('sgti_token') || '';
+      try {
+        await fetch('/api/equipo/upload-geojson', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', Authorization:`Bearer ${tk}` },
+          credentials: 'include',
+          body: JSON.stringify({ type:'FeatureCollection', features })
+        });
+        window.sectoresGeoJSONFeatures = features;
+      } catch(e) { console.error('[scanResave]', e.message); }
+    };
+
+    // Exponer para el botón inline del popup del modal de escaneo
+    window._scanDeleteSector = _scanDeleteSector;
+  })();
+
+  // ── Sector filter dinámico: reemplaza las opciones hardcodeadas del bundle ──
+  (function() {
+    let _feat = null;
+
+    function _populate(features) {
+      const sel = document.getElementById('filter-sector');
+      if (!sel) return;
+      if (features && features.length) _feat = features;
+      if (!_feat || !_feat.length) return;
+      const cur = sel.value;
+      sel.innerHTML = '<option value="all">Todos</option>' +
+        _feat.map(f => {
+          const nm = (f.properties?.Name || f.properties?.name || 'Sector').trim();
+          return `<option value="${nm}">${nm}</option>`;
+        }).join('');
+      if (cur !== 'all' && [...sel.options].some(o => o.value === cur)) sel.value = cur;
+    }
+
+    async function _fetchAndPopulate() {
+      const tk = localStorage.getItem('sgti_token') || '';
+      if (!tk) return;
+      try {
+        const r = await fetch('/api/equipo/geojson/default', {
+          headers: { Authorization: `Bearer ${tk}` }, credentials: 'include'
+        });
+        const geo = await r.json();
+        if (geo?.features?.length) _populate(geo.features);
+      } catch(e) {}
+    }
+
+    // Interceptar asignaciones a window.sectoresGeoJSONFeatures
+    let _cached = window.sectoresGeoJSONFeatures;
+    try {
+      Object.defineProperty(window, 'sectoresGeoJSONFeatures', {
+        get() { return _cached; },
+        set(v) { _cached = v; if (v?.length) setTimeout(() => _populate(v), 50); },
+        configurable: true
+      });
+    } catch(e) {}
+
+    // Esperar a que #filter-sector aparezca en el DOM
+    const _obs = new MutationObserver(() => {
+      if (!document.getElementById('filter-sector')) return;
+      _obs.disconnect();
+      if (window.sectoresGeoJSONFeatures?.length) _populate(window.sectoresGeoJSONFeatures);
+      else _fetchAndPopulate();
+    });
+    _obs.observe(document.documentElement, { childList: true, subtree: true });
+
+  })();
+  </script>
+
+  <!-- Renombrar etiquetas "WhatsApp" → "Reportes Móviles" en el panel -->
+  <script>
+  (function() {
+    // Nodos de texto cortos que son exactamente etiquetas de nav/título
+    // No tocar instrucciones largas del bot (QR, vincular dispositivo, etc.)
+    function reemplazarTexto(node) {
+      if (node.nodeType !== Node.TEXT_NODE) return;
+      const txt = node.textContent.trim();
+      // Solo renombrar si el texto es exactamente "WhatsApp" o una variante corta de nav
+      if (/^WhatsApp\.?$/.test(txt)) {
+        node.textContent = node.textContent.replace(/WhatsApp\.?/, 'Reportes Móviles');
+      }
+    }
+
+    function recorrer(root) {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) reemplazarTexto(node);
+    }
+
+    // Aplicar tras carga inicial y observar cambios del router SPA
+    const obs = new MutationObserver(muts => {
+      for (const m of muts) m.addedNodes.forEach(n => {
+        if (n.nodeType === Node.ELEMENT_NODE) recorrer(n);
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      recorrer(document.body);
+      obs.observe(document.body, { childList: true, subtree: true });
+    });
+  })();
+  </script>
+
+  <!-- Parche: sub-gerencias dinámicas para gerentes -->
+  <script>
+  (function() {
+    var _gerencias = null;
+
+    function _getUser() {
+      try { return JSON.parse(localStorage.getItem('sgti_user') || '{}'); } catch(e) { return {}; }
+    }
+
+    async function _fetchGerencias() {
+      if (_gerencias) return _gerencias;
+      var token = localStorage.getItem('sgti_token');
+      if (!token) return [];
+      try {
+        var resp = await fetch('/api/equipo/gerencias', {
+          headers: {'Authorization': 'Bearer ' + token},
+          credentials: 'include'
+        });
+        if (resp.ok) {
+          var data = await resp.json();
+          if (Array.isArray(data)) { _gerencias = data; return data; }
+        }
+      } catch(e) {}
+      return [];
+    }
+
+    function _fixToggle() {
+      var c = document.getElementById('sidebar-gerencias-container');
+      if (!c || !c.children.length) return;
+      // El compiled code oculta los items del container porque su onclick no coincide
+      // con la gerencia hardcodeada (p.ej. 'fiscalizacion' no pasa el filtro de 'seguridad').
+      // Re-mostrar todos los items que el compilado ocultó.
+      Array.from(c.children).forEach(function(el) { el.style.display = ''; });
+      var toggle = c.previousElementSibling;
+      if (toggle && toggle.classList.contains('gerencia-toggle')) {
+        toggle.style.display = '';
+        var sec = toggle.previousElementSibling;
+        if (sec && sec.classList.contains('nav-section')) sec.style.display = '';
+      }
+    }
+
+    // ── renderEquipoList interceptor ────────────────────────────────────────────
+    // El compiled code filtra el personal client-side con gerencias hardcodeadas
+    // (p.ej. seguridad→serenazgo). Para municipios con sub-áreas dinámicas,
+    // re-fetcha desde la API (que ya hace el scope correcto) y re-renderiza.
+    var _renderEquipoFn = null;
+    var _personalCache  = null;
+
+    function _buildEquipoTable(personal, userRol) {
+      if (!personal || personal.length === 0) {
+        return '<div style="padding:40px;text-align:center;color:var(--text-dim)">No se encontraron usuarios.</div>';
+      }
+      var rows = personal.map(function(e) {
+        var canEdit = userRol === 'admin' || userRol === 'alcalde' ||
+                      (userRol === 'gerente' && e.rol !== 'gerente' && e.rol !== 'admin' && e.rol !== 'alcalde');
+        var rolLabel = e.rol === 'visor' ? 'Supervisor Web' :
+                       e.rol === 'supervisor' ? 'Supervisor de Campo' :
+                       e.rol === 'gerente' ? 'Gerente de Área' :
+                       e.rol === 'admin' ? 'Administrador' :
+                       e.rol === 'alcalde' ? 'Alcalde' : 'Operador de Campo';
+        var rolCell = canEdit
+          ? '<select class="filter-select" style="padding:4px 8px;font-size:11px;font-weight:600;width:170px;border-radius:6px;cursor:pointer;" onchange="window.cambiarRolDirecto(' + e.id + ', this.value, \'' + e.nombre.replace(/'/g,"&#39;") + '\', \'' + e.rol + '\')">' +
+              '<option value="operador"' + (e.rol==='operador'?' selected':'') + '>Operador de Campo</option>' +
+              '<option value="supervisor"' + (e.rol==='supervisor'?' selected':'') + '>Supervisor de Campo</option>' +
+              '<option value="visor"' + (e.rol==='visor'?' selected':'') + '>Supervisor Web</option>' +
+              (e.rol==='gerente' ? '<option value="gerente" selected>Gerente de Área</option>' : '') +
+              (e.rol==='admin'   ? '<option value="admin" selected>Administrador</option>' : '') +
+            '</select>'
+          : '<span class="badge badge-gray" style="font-size:11px;font-weight:600;">' + rolLabel + '</span>';
+        var fecha = e.createdAt ? new Date(e.createdAt).toLocaleDateString() : '-';
+        return '<tr>' +
+          '<td><div style="display:flex;align-items:center;gap:10px;">' +
+            '<div class="avatar" style="width:24px;height:24px;font-size:10px;">' + e.nombre.charAt(0) + '</div>' +
+            '<a href="#" onclick="verReportesUsuario(' + e.id + ', \'' + e.nombre.replace(/'/g,"&#39;") + '\')" style="color:var(--blue);text-decoration:none;font-weight:600;">' + e.nombre + '</a>' +
+          '</div></td>' +
+          '<td><span class="badge badge-blue" style="text-transform:capitalize;">' + (e.gerencia||'-') + '</span></td>' +
+          '<td>' + rolCell + '</td>' +
+          '<td><code>' + e.username + '</code></td>' +
+          '<td><div style="display:flex;align-items:center;gap:6px;"><span style="font-weight:700;color:' + (e.reportesHoy>0?'var(--green)':'var(--text-dim)') + '">' + (e.reportesHoy||0) + '</span><span style="font-size:10px;color:var(--text-muted)">reportes</span></div></td>' +
+          '<td>' + fecha + '</td>' +
+          '<td><div style="display:flex;gap:6px;">' +
+            '<button class="btn btn-ghost" style="color:var(--cyan);padding:4px 8px;font-size:10px;font-weight:bold;" onclick="window.abrirModalSesiones(\'' + e.username + '\')">Ver Accesos</button>' +
+            (canEdit ? '<button class="btn btn-ghost" style="color:var(--yellow);padding:4px 8px;font-size:10px;font-weight:600;" onclick="window.editarUsuarioEquipo(' + e.id + ',\'' + e.nombre.replace(/'/g,"&#39;") + '\',\'' + e.username + '\')">Editar</button>' +
+              '<button class="btn btn-ghost" style="color:var(--blue);padding:4px 8px;font-size:10px;" onclick="resetearClaveEquipo(' + e.id + ',\'' + e.nombre.replace(/'/g,"&#39;") + '\')">Resetear Clave</button>' +
+              '<button class="btn btn-ghost" style="color:var(--red);padding:4px 8px;font-size:10px;" onclick="confirmarEliminarEquipo(' + e.id + ',\'' + e.nombre.replace(/'/g,"&#39;") + '\')">Eliminar</button>' : '') +
+          '</div></td>' +
+        '</tr>';
+      }).join('');
+      return '<table class="data-table"><thead><tr>' +
+        '<th>Nombre Completo</th><th>Gerencia / Área</th><th>Rol</th><th>Usuario</th><th>Reportes Hoy</th><th>Fecha Registro</th><th>Acciones</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table>';
+    }
+
+    Object.defineProperty(window, 'renderEquipoList', {
+      configurable: true, enumerable: true,
+      get: function() { return _renderEquipoFn; },
+      set: function(fn) {
+        _renderEquipoFn = async function() {
+          await fn.apply(this, arguments);
+          var user = _getUser();
+          if (!user || !user.gerencia || user.gerencia === 'all' || user.gerencia === 'municipal') return;
+          // Solo actuar cuando el gerente tiene sub-áreas dinámicas en BD
+          var subAreas = (_gerencias || []).filter(function(g) {
+            return g.esSubArea && g.parentClave === user.gerencia;
+          });
+          if (subAreas.length === 0) return;
+
+          // Re-fetch personal (el servidor ya filtra por gerencia + sub-áreas)
+          var token = localStorage.getItem('sgti_token');
+          try {
+            var resp = await fetch('/api/equipo/personal', {
+              headers: { 'Authorization': 'Bearer ' + token },
+              credentials: 'include'
+            });
+            if (!resp.ok) return;
+            _personalCache = await resp.json();
+          } catch(e) { return; }
+
+          // Corregir el dropdown de sub-áreas (compiled tiene opciones hardcodeadas)
+          var filtro = document.getElementById('eq-filtro-subarea');
+          if (filtro) {
+            filtro.style.display = 'block';
+            filtro.innerHTML = '<option value="todos">Todas las sub-áreas</option>' +
+              subAreas.map(function(g) {
+                return '<option value="' + g.clave + '">' + g.nombre + '</option>';
+              }).join('');
+            filtro.value = 'todos';
+          }
+
+          // Sobreescribir filtrarEquipo para usar nuestros datos correctos
+          window.filtrarEquipo = function() {
+            var container = document.getElementById('equipo-lista-container');
+            var badge     = document.getElementById('equipo-count-badge');
+            var search    = (document.getElementById('eq-search')?.value || '').toLowerCase();
+            var subfilter = (document.getElementById('eq-filtro-subarea')?.value || 'todos');
+            if (!container || !_personalCache) return;
+            var filtered = _personalCache.filter(function(u) {
+              return (!search || u.nombre.toLowerCase().includes(search)) &&
+                     (subfilter === 'todos' || u.gerencia === subfilter);
+            });
+            if (badge) badge.textContent = filtered.length + ' Usuarios Registrados';
+            container.innerHTML = _buildEquipoTable(filtered, user.rol);
+          };
+
+          window.filtrarEquipo();
+        };
+      }
+    });
+    // ────────────────────────────────────────────────────────────────────────────
+
+    // Interceptor persistente para initDynamicGerencias:
+    // pre-carga gerencias ANTES de llamar la función original, garantizando que
+    // _gerencias esté lista cuando el router llame a switchWspGroup justo después.
+    var _initFn = null;
+    Object.defineProperty(window, 'initDynamicGerencias', {
+      configurable: true, enumerable: true,
+      get: function() { return _initFn; },
+      set: function(fn) {
+        _initFn = async function() {
+          await _fetchGerencias();
+          var result = await fn.apply(this, arguments);
+          setTimeout(_fixToggle, 100);
+          return result;
+        };
+      }
+    });
+
+    // Interceptor persistente para switchWspGroup:
+    // redirige al gerente a la primera sub-área cuando se le pasa su gerencia padre.
+    // Al ser un accessor permanente, funciona incluso en la primera llamada del módulo.
+    var _switchImpl = null;
+    Object.defineProperty(window, 'switchWspGroup', {
+      configurable: true, enumerable: true,
+      get: function() { return _switchImpl; },
+      set: function(fn) {
+        _switchImpl = function(clave) {
+          var user = _getUser();
+          if (user.gerencia && user.gerencia !== 'all' && user.gerencia !== 'municipal'
+              && clave === user.gerencia && _gerencias) {
+            var subs = _gerencias.filter(function(g) {
+              return g.esSubArea && g.parentClave === clave;
+            });
+            if (subs.length > 0) clave = subs[0].clave;
+          }
+          return fn.call(this, clave);
+        };
+      }
+    });
+
+    // Parchear router.navigate una vez disponible (cubre clics del usuario)
+    function _patchRouter() {
+      if (!window.router || !window.router.navigate) {
+        setTimeout(_patchRouter, 150);
+        return;
+      }
+      if (window.router._sgtiPatched) return;
+      window.router._sgtiPatched = true;
+
+      var _origNav = window.router.navigate.bind(window.router);
+      window.router.navigate = function(path) {
+        if (!path.startsWith('/dashboard/incidencias/')) return _origNav(path);
+        var user = _getUser();
+        if (!user.gerencia || user.gerencia === 'all' || user.gerencia === 'municipal') return _origNav(path);
+        var clave = path.substring('/dashboard/incidencias/'.length);
+        var g = (_gerencias || []).find(function(g) { return g.clave === clave; });
+        if (g && g.esSubArea && g.parentClave === user.gerencia) {
+          window.history.pushState({}, '', path);
+          if (window.showView) window.showView('whatsapp');
+          setTimeout(function() {
+            if (window.switchWspGroup) window.switchWspGroup(clave);
+            if (window.switchWspTab) window.switchWspTab('feed');
+          }, 50);
+          return;
+        }
+        return _origNav(path);
+      };
+
+      var cont = document.getElementById('sidebar-gerencias-container');
+      if (cont) new MutationObserver(_fixToggle).observe(cont, {childList: true});
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', _patchRouter);
+    } else {
+      _patchRouter();
+    }
+  })();
+  </script>
+
+</body>
+
+</html>

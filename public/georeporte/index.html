@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SGTI — Reporte Georeferenciado</title>
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo-container">
+                <img src="logo.png" alt="Logo Municipalidad" id="app-logo">
+            </div>
+            <div class="header-text">
+                <h1>Reporte Móvil</h1>
+                <p>Gestión Territorial Inteligente</p>
+            </div>
+        </header>
+
+        <!-- Main Form -->
+        <main id="main-content">
+            <div class="card glass">
+                <div class="step-indicator">
+                    <span class="step active" id="step-1-dot"></span>
+                    <span class="step" id="step-2-dot"></span>
+                </div>
+
+                <!-- Step 1: Location -->
+                <div id="section-location" class="form-section">
+                    <h2 class="section-title"><i class="fas fa-map-marker-alt"></i> Ubicación</h2>
+                    <p class="section-desc">Detectaremos tu ubicación automáticamente. Si es necesario, ajusta el marcador en el mapa.</p>
+                    
+                    <div id="map"></div>
+                    
+                    <div class="location-status" id="location-status">
+                        <i class="fas fa-circle-notch fa-spin"></i> Obteniendo coordenadas...
+                    </div>
+
+                    <button type="button" class="btn-secondary" id="btn-refresh-location">
+                        <i class="fas fa-sync-alt"></i> Recalibrar Ubicación
+                    </button>
+                    
+                    <button type="button" class="btn-primary next-step" id="btn-to-details">
+                        Siguiente <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Step 2: Details -->
+                <div id="section-details" class="form-section hidden">
+                    <h2 class="section-title"><i class="fas fa-edit"></i> Detalles</h2>
+                    <p class="section-desc">Cuéntanos qué está sucediendo para intervenir con precisión.</p>
+                    
+                    <div class="form-group">
+                        <label for="categoria">Categoría</label>
+                        <select id="categoria" required>
+                            <option value="Seguridad">Seguridad Ciudadana</option>
+                            <option value="Limpieza">Limpieza Pública</option>
+                            <option value="Obras">Obras / Infraestructura</option>
+                            <option value="Fiscalización">Fiscalización</option>
+                            <option value="Tránsito">Tránsito y Transporte</option>
+                            <option value="Riesgos">Defensa Civil / Riesgos</option>
+                            <option value="Otros">Otros Incidentes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prioridad">Prioridad</label>
+                        <select id="prioridad">
+                            <option value="Baja">Baja (Informativo)</option>
+                            <option value="Media" selected>Media (Atención normal)</option>
+                            <option value="Alta">Alta (Urgente)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mensaje">Descripción de la Intervención</label>
+                        <textarea id="mensaje" placeholder="Escribe aquí los detalles del incidente..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reportadoPor">Tu Nombre (Opcional)</label>
+                        <input type="text" id="reportadoPor" placeholder="Para seguimiento opcional">
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn-secondary prev-step" id="btn-back-to-map">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </button>
+                        <button type="button" class="btn-primary" id="btn-submit">
+                            Enviar Reporte <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Success State -->
+                <div id="section-success" class="form-section hidden text-center">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2 class="section-title">¡Reporte Enviado!</h2>
+                    <p class="section-desc">Gracias por tu contribución. El personal municipal ha sido notificado con tu ubicación exacta.</p>
+                    <p id="report-id-text" style="font-weight: bold; color: var(--accent); margin-top: 10px;"></p>
+                    
+                    <button type="button" class="btn-primary" onclick="window.location.reload()">
+                        Nuevo Reporte <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Municipalidad de Carmen de la Legua Reynoso</p>
+            <p>SGTI — Sistema de Gestión Territorial Inteligente</p>
+        </footer>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema No Disponible — SGTI</title>
+  <style>
+    :root {
+      --bg: #0a0f1e;
+      --card-bg: #111827;
+      --card-border: rgba(255,255,255,0.07);
+      --text: #f1f5f9;
+      --text-dim: #94a3b8;
+      --text-muted: #64748b;
+      --amber: #f59e0b;
+      --amber-dim: rgba(245,158,11,0.12);
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 40px 36px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      animation: fadeUp 0.5s ease-out;
+    }
+    .icon-ring {
+      width: 76px;
+      height: 76px;
+      background: var(--amber-dim);
+      border: 2px solid rgba(245,158,11,0.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      color: var(--amber);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      letter-spacing: -0.4px;
+    }
+    .subtitle {
+      color: var(--amber);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    p {
+      color: var(--text-dim);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid var(--card-border);
+      margin: 28px 0;
+    }
+    .contact-box {
+      background: rgba(59,130,246,0.07);
+      border: 1px solid rgba(59,130,246,0.15);
+      border-radius: 10px;
+      padding: 16px 20px;
+      text-align: left;
+    }
+    .contact-box .label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      color: var(--blue);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .contact-box p {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+      color: var(--red);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .badge .dot {
+      width: 6px; height: 6px;
+      background: var(--red);
+      border-radius: 50%;
+      animation: blink 1.2s ease-in-out infinite;
+    }
+    .footer {
+      margin-top: 32px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.15); }
+      50%       { box-shadow: 0 0 0 12px rgba(245,158,11,0); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon-ring">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </div>
+
+    <div class="badge"><span class="dot"></span> Servicio no disponible</div>
+
+    <h1>Este sistema está temporalmente fuera de servicio</h1>
+    <p style="margin-top:12px;">
+      El acceso al <strong>Sistema de Gestión Territorial Integrado (SGTI)</strong>
+      de esta municipalidad ha sido suspendido.<br><br>
+      Esto puede deberse a un mantenimiento programado o a una
+      suspensión administrativa de la cuenta.
+    </p>
+
+    <hr class="divider">
+
+    <div class="contact-box">
+      <div class="label">¿Eres el administrador?</div>
+      <p>
+        Por favor comunícate con el encargado del sistema para
+        regularizar el acceso. Si el problema persiste, contacta
+        al soporte técnico de <strong>SGTI Municipal</strong>.
+      </p>
+    </div>
+  </div>
+
+  <div class="footer">Sistema de Gestión Territorial Integrado &mdash; SGTI Municipal</div>
+</body>
+</html>
