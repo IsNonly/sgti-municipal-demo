@@ -31,8 +31,7 @@ cd sgti-municipal
 npm install
 ```
 
-> La dependencia `whatsapp-web.js` puede tardar. Si falla con errores de puppeteer
-> en sistemas sin interfaz grafica, usar:
+> Si la instalacion falla con errores de puppeteer en sistemas sin interfaz grafica, usar:
 > ```bash
 > PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install
 > ```
@@ -59,6 +58,7 @@ NODE_ENV=development
 DB_UNIFIED_HOST=127.0.0.1
 DB_UNIFIED_NAME=sgti_demo
 DISABLE_WHATSAPP=true
+OPENAI_API_KEY=
 ```
 
 ---
@@ -172,7 +172,6 @@ Confirmar en `.env`:
 
 Ninguna operacion del sistema en modo local se conecta con:
 - La base de datos de produccion (Hostinger)
-- WhatsApp real
 - OpenAI ni ningun servicio de IA facturado
 - Almacenamiento de fotos real
 - APIs de produccion
@@ -212,11 +211,9 @@ Luego repetir pasos 5 y 6.
 
 | Servicio                  | Estado en local      | Variable de control       |
 |---------------------------|----------------------|---------------------------|
-| WhatsApp Web              | Desactivado          | `DISABLE_WHATSAPP=true`   |
 | OpenAI / IA               | Desactivado          | `OPENAI_API_KEY=` (vacio) |
 | Fotos/uploads a disco     | Activo (carpeta local public/uploads/) | — |
 | Reverse-geocode Nominatim | Activo (API publica, sin clave) | — |
-| QR WhatsApp               | No genera            | `DISABLE_WHATSAPP=true`   |
 
 ---
 
